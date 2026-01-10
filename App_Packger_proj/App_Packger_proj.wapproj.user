@@ -1,0 +1,17 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="Current" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <UapAppxPackageBuildMode>StoreAndSideload</UapAppxPackageBuildMode>
+    <AppxShowAllApps>False</AppxShowAllApps>
+    <AppxBuildConfigurationSelection>x86</AppxBuildConfigurationSelection>
+    <PackageOptionalProjectsInIdeBuilds>False</PackageOptionalProjectsInIdeBuilds>
+    <Source>E:\Graphics\Graphics For Applications\Power-Plan Manager\PowerPlanManagerSquare400x400%28Final%29%28Publish%29.png</Source>
+    <SmallTileSource>E:\Graphics\Graphics For Applications\Power-Plan Manager\PowerPlanManagerSquare400x400%28Final%29%28Publish%29.png</SmallTileSource>
+    <MediumTileSource>E:\Graphics\Graphics For Applications\Power-Plan Manager\PowerPlanManagerSquare400x400%28Final%29%28Publish%29.png</MediumTileSource>
+    <WideTileSource>E:\Graphics\Graphics For Applications\Power-Plan Manager\PowerPlanManagerSquare400x400%28Final%29%28Publish%29.png</WideTileSource>
+    <LargeTileSource>E:\Graphics\Graphics For Applications\Power-Plan Manager\PowerPlanManagerSquare400x400%28Final%29%28Publish%29.png</LargeTileSource>
+    <AppIconSource>E:\Graphics\Graphics For Applications\Power-Plan Manager\PowerPlanManagerSquare400x400%28Final%29%28Publish%29.png</AppIconSource>
+    <SplashScreenSource>E:\Graphics\Graphics For Applications\Power-Plan Manager\PowerPlanManagerSquare400x400%28Final%29%28Publish%29.png</SplashScreenSource>
+    <PackageLogoSource>E:\Graphics\Graphics For Applications\Power-Plan Manager\PowerPlanManagerSquare400x400%28Final%29%28Publish%29.png</PackageLogoSource>
+  </PropertyGroup>
+</Project>

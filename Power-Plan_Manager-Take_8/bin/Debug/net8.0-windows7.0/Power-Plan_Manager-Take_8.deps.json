@@ -1,0 +1,23 @@
+{
+  "runtimeTarget": {
+    "name": ".NETCoreApp,Version=v8.0",
+    "signature": ""
+  },
+  "compilationOptions": {},
+  "targets": {
+    ".NETCoreApp,Version=v8.0": {
+      "Power-Plan_Manager-Take_8/1.0.0": {
+        "runtime": {
+          "Power-Plan_Manager-Take_8.dll": {}
+        }
+      }
+    }
+  },
+  "libraries": {
+    "Power-Plan_Manager-Take_8/1.0.0": {
+      "type": "project",
+      "serviceable": false,
+      "sha512": ""
+    }
+  }
+}

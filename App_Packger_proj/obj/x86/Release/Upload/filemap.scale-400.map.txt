@@ -1,0 +1,13 @@
+﻿[ResourceMetadata]
+"ResourceId"			"filemap.scale-400"
+"ResourceDimensions"		"scale-400"
+
+[Files]
+"E:\C#\Visual Studio\Power-Plan_Manager-Ready To Publish - Final\App_Packger_proj\obj\x86\Release\Upload\filemap.scale-400.pri"			"resources.pri"
+"E:\C#\Visual Studio\Power-Plan_Manager-Ready To Publish - Final\App_Packger_proj\obj\x86\Release\PackageUploadLayout\Images\Wide310x150Logo.scale-400.png"			"Images\Wide310x150Logo.scale-400.png"
+"E:\C#\Visual Studio\Power-Plan_Manager-Ready To Publish - Final\App_Packger_proj\obj\x86\Release\PackageUploadLayout\Images\StoreLogo.scale-400.png"			"Images\StoreLogo.scale-400.png"
+"E:\C#\Visual Studio\Power-Plan_Manager-Ready To Publish - Final\App_Packger_proj\obj\x86\Release\PackageUploadLayout\Images\Square44x44Logo.scale-400.png"			"Images\Square44x44Logo.scale-400.png"
+"E:\C#\Visual Studio\Power-Plan_Manager-Ready To Publish - Final\App_Packger_proj\obj\x86\Release\PackageUploadLayout\Images\Square150x150Logo.scale-400.png"			"Images\Square150x150Logo.scale-400.png"
+"E:\C#\Visual Studio\Power-Plan_Manager-Ready To Publish - Final\App_Packger_proj\obj\x86\Release\PackageUploadLayout\Images\SplashScreen.scale-400.png"			"Images\SplashScreen.scale-400.png"
+"E:\C#\Visual Studio\Power-Plan_Manager-Ready To Publish - Final\App_Packger_proj\obj\x86\Release\PackageUploadLayout\Images\SmallTile.scale-400.png"			"Images\SmallTile.scale-400.png"
+"E:\C#\Visual Studio\Power-Plan_Manager-Ready To Publish - Final\App_Packger_proj\obj\x86\Release\PackageUploadLayout\Images\LargeTile.scale-400.png"			"Images\LargeTile.scale-400.png"

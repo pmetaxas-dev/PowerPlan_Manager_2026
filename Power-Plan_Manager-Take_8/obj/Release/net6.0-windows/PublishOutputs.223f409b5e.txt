@@ -1,0 +1,6 @@
+E:\C#\Visual Studio\Power-Plan_Manager-Ready To Publish - Final\Power-Plan_Manager-Take_8\bin\Release\net6.0-windows\publish\Power-Plan_Manager-Take_8.exe
+E:\C#\Visual Studio\Power-Plan_Manager-Ready To Publish - Final\Power-Plan_Manager-Take_8\bin\Release\net6.0-windows\publish\Power-Plan_Manager-Take_8.dll
+E:\C#\Visual Studio\Power-Plan_Manager-Ready To Publish - Final\Power-Plan_Manager-Take_8\bin\Release\net6.0-windows\publish\Power-Plan_Manager-Take_8.deps.json
+E:\C#\Visual Studio\Power-Plan_Manager-Ready To Publish - Final\Power-Plan_Manager-Take_8\bin\Release\net6.0-windows\publish\Power-Plan_Manager-Take_8.runtimeconfig.json
+E:\C#\Visual Studio\Power-Plan_Manager-Ready To Publish - Final\Power-Plan_Manager-Take_8\bin\Release\net6.0-windows\publish\Power-Plan_Manager-Take_8.dll.config
+E:\C#\Visual Studio\Power-Plan_Manager-Ready To Publish - Final\Power-Plan_Manager-Take_8\bin\Release\net6.0-windows\publish\Power-Plan_Manager-Take_8.pdb

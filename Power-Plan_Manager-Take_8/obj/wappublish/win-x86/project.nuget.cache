@@ -1,0 +1,12 @@
+{
+  "version": 2,
+  "dgSpecHash": "ytTy9El2fVNCRf6LECB7zFj0OIwHbFJ2MZIYkWW10bHKG9cT5/M1+KtTkVeEoF4jqJ+i4vtAmdRDr4VUAc4lvQ==",
+  "success": true,
+  "projectFilePath": "E:\\C#\\Visual Studio\\Power-Plan_Manager-Ready To Publish - Final\\Power-Plan_Manager-Take_8\\Power-Plan_Manager-Take_8.csproj",
+  "expectedPackageFiles": [
+    "C:\\Users\\Sentinel\\.nuget\\packages\\microsoft.netcore.app.runtime.win-x86\\6.0.28\\microsoft.netcore.app.runtime.win-x86.6.0.28.nupkg.sha512",
+    "C:\\Users\\Sentinel\\.nuget\\packages\\microsoft.windowsdesktop.app.runtime.win-x86\\6.0.28\\microsoft.windowsdesktop.app.runtime.win-x86.6.0.28.nupkg.sha512",
+    "C:\\Users\\Sentinel\\.nuget\\packages\\microsoft.aspnetcore.app.runtime.win-x86\\6.0.28\\microsoft.aspnetcore.app.runtime.win-x86.6.0.28.nupkg.sha512"
+  ],
+  "logs": []
+}

@@ -1,0 +1,79 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <Machine>THE_SENTINEL</Machine>
+    <WindowsUser>Sentinel</WindowsUser>
+    <TargetPlatformIdentifier>UAP</TargetPlatformIdentifier>
+    <TargetOsVersion>10.0</TargetOsVersion>
+    <TargetOsDescription>Windows 10.0</TargetOsDescription>
+    <SolutionConfiguration>Release|AnyCPU</SolutionConfiguration>
+    <PackageArchitecture>neutral</PackageArchitecture>
+    <PackageIdentityName>166966f1-a499-42cd-8d61-a8c5315ea30b</PackageIdentityName>
+    <PackageIdentityPublisher>CN=Sentinel</PackageIdentityPublisher>
+    <IntermediateOutputPath>E:\C#\Visual Studio\Power-Plan_Manager-Ready To Publish - Final\App_Packger_proj\obj\Release\</IntermediateOutputPath>
+    <RemoteDeploymentType></RemoteDeploymentType>
+    <PackageRegistrationPath></PackageRegistrationPath>
+    <RemoveNonLayoutFiles>true</RemoveNonLayoutFiles>
+    <DeployOptionalPackages>false</DeployOptionalPackages>
+    <WindowsSdkPath></WindowsSdkPath>
+    <LayoutDir>E:\C#\Visual Studio\Power-Plan_Manager-Ready To Publish - Final\App_Packger_proj\bin\AnyCPU\Release\AppX</LayoutDir>
+  </PropertyGroup>
+  <ItemGroup>
+    <AppXManifest Include="E:\C#\Visual Studio\Power-Plan_Manager-Ready To Publish - Final\App_Packger_proj\bin\AnyCPU\Release\AppxManifest.xml">
+      <PackagePath>AppxManifest.xml</PackagePath>
+      <ReRegisterAppIfChanged>true</ReRegisterAppIfChanged>
+    </AppXManifest>
+  </ItemGroup>
+  <ItemGroup>
+    <AppxPackagedFile Include="E:\C#\Visual Studio\Power-Plan_Manager-Ready To Publish - Final\App_Packger_proj\Images\SplashScreen.scale-200.png">
+      <PackagePath>Images\SplashScreen.scale-200.png</PackagePath>
+      <ReRegisterAppIfChanged>true</ReRegisterAppIfChanged>
+    </AppxPackagedFile>
+    <AppxPackagedFile Include="E:\C#\Visual Studio\Power-Plan_Manager-Ready To Publish - Final\App_Packger_proj\Images\LockScreenLogo.scale-200.png">
+      <PackagePath>Images\LockScreenLogo.scale-200.png</PackagePath>
+    </AppxPackagedFile>
+    <AppxPackagedFile Include="E:\C#\Visual Studio\Power-Plan_Manager-Ready To Publish - Final\App_Packger_proj\Images\Square150x150Logo.scale-200.png">
+      <PackagePath>Images\Square150x150Logo.scale-200.png</PackagePath>
+      <ReRegisterAppIfChanged>true</ReRegisterAppIfChanged>
+    </AppxPackagedFile>
+    <AppxPackagedFile Include="E:\C#\Visual Studio\Power-Plan_Manager-Ready To Publish - Final\App_Packger_proj\Images\Square44x44Logo.scale-200.png">
+      <PackagePath>Images\Square44x44Logo.scale-200.png</PackagePath>
+      <ReRegisterAppIfChanged>true</ReRegisterAppIfChanged>
+    </AppxPackagedFile>
+    <AppxPackagedFile Include="E:\C#\Visual Studio\Power-Plan_Manager-Ready To Publish - Final\App_Packger_proj\Images\Square44x44Logo.targetsize-24_altform-unplated.png">
+      <PackagePath>Images\Square44x44Logo.targetsize-24_altform-unplated.png</PackagePath>
+      <ReRegisterAppIfChanged>true</ReRegisterAppIfChanged>
+    </AppxPackagedFile>
+    <AppxPackagedFile Include="E:\C#\Visual Studio\Power-Plan_Manager-Ready To Publish - Final\App_Packger_proj\Images\StoreLogo.png">
+      <PackagePath>Images\StoreLogo.png</PackagePath>
+      <ReRegisterAppIfChanged>true</ReRegisterAppIfChanged>
+    </AppxPackagedFile>
+    <AppxPackagedFile Include="E:\C#\Visual Studio\Power-Plan_Manager-Ready To Publish - Final\App_Packger_proj\Images\Wide310x150Logo.scale-200.png">
+      <PackagePath>Images\Wide310x150Logo.scale-200.png</PackagePath>
+      <ReRegisterAppIfChanged>true</ReRegisterAppIfChanged>
+    </AppxPackagedFile>
+    <AppxPackagedFile Include="E:\C#\Visual Studio\Power-Plan_Manager-Ready To Publish - Final\App_Packger_proj\bin\AnyCPU\Release\resources.pri">
+      <PackagePath>resources.pri</PackagePath>
+    </AppxPackagedFile>
+    <AppxPackagedFile Include="E:\C#\Visual Studio\Power-Plan_Manager-Ready To Publish - Final\Power-Plan_Manager-Take_8\bin\Release\net6.0-windows\Power-Plan_Manager-Take_8.deps.json">
+      <PackagePath>Power-Plan_Manager-Take_8\Power-Plan_Manager-Take_8.deps.json</PackagePath>
+    </AppxPackagedFile>
+    <AppxPackagedFile Include="E:\C#\Visual Studio\Power-Plan_Manager-Ready To Publish - Final\Power-Plan_Manager-Take_8\obj\Release\net6.0-windows\apphost.exe">
+      <PackagePath>Power-Plan_Manager-Take_8\Power-Plan_Manager-Take_8.exe</PackagePath>
+    </AppxPackagedFile>
+    <AppxPackagedFile Include="E:\C#\Visual Studio\Power-Plan_Manager-Ready To Publish - Final\Power-Plan_Manager-Take_8\Papirus-Team-Papirus-Apps-Preferences-system-login.ico">
+      <PackagePath>Power-Plan_Manager-Take_8\Papirus-Team-Papirus-Apps-Preferences-system-login.ico</PackagePath>
+    </AppxPackagedFile>
+    <AppxPackagedFile Include="E:\C#\Visual Studio\Power-Plan_Manager-Ready To Publish - Final\Power-Plan_Manager-Take_8\bin\Release\net6.0-windows\Power-Plan_Manager-Take_8.runtimeconfig.json">
+      <PackagePath>Power-Plan_Manager-Take_8\Power-Plan_Manager-Take_8.runtimeconfig.json</PackagePath>
+    </AppxPackagedFile>
+    <AppxPackagedFile Include="E:\C#\Visual Studio\Power-Plan_Manager-Ready To Publish - Final\Power-Plan_Manager-Take_8\bin\Release\net6.0-windows\Power-Plan_Manager-Take_8.dll">
+      <PackagePath>Power-Plan_Manager-Take_8\Power-Plan_Manager-Take_8.dll</PackagePath>
+    </AppxPackagedFile>
+    <AppxPackagedFile Include="E:\C#\Visual Studio\Power-Plan_Manager-Ready To Publish - Final\Power-Plan_Manager-Take_8\bin\Release\net6.0-windows\Power-Plan_Manager-Take_8.dll.config">
+      <PackagePath>Power-Plan_Manager-Take_8\Power-Plan_Manager-Take_8.dll.config</PackagePath>
+    </AppxPackagedFile>
+  </ItemGroup>
+  <ItemGroup>
+  </ItemGroup>
+</Project>

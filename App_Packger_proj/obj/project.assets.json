@@ -1,0 +1,130 @@
+{
+  "version": 3,
+  "targets": {
+    "UAP,Version=v10.0.17763": {},
+    "UAP,Version=v10.0.17763/win10-arm": {},
+    "UAP,Version=v10.0.17763/win10-arm-aot": {},
+    "UAP,Version=v10.0.17763/win10-arm64-aot": {},
+    "UAP,Version=v10.0.17763/win10-x64": {},
+    "UAP,Version=v10.0.17763/win10-x64-aot": {},
+    "UAP,Version=v10.0.17763/win10-x86": {},
+    "UAP,Version=v10.0.17763/win10-x86-aot": {}
+  },
+  "libraries": {},
+  "projectFileDependencyGroups": {
+    "UAP,Version=v10.0.17763": [
+      "Microsoft.Windows.SDK.BuildTools >= 10.0.22621.756"
+    ]
+  },
+  "packageFolders": {
+    "C:\\Users\\Sentinel\\.nuget\\packages\\": {},
+    "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages": {}
+  },
+  "project": {
+    "version": "1.0.0",
+    "restore": {
+      "projectUniqueName": "E:\\C#\\Visual Studio\\Power-Plan_Manager-Ready To Publish - Final\\App_Packger_proj\\App_Packger_proj.wapproj",
+      "projectName": "App_Packger_proj",
+      "projectPath": "E:\\C#\\Visual Studio\\Power-Plan_Manager-Ready To Publish - Final\\App_Packger_proj\\App_Packger_proj.wapproj",
+      "packagesPath": "C:\\Users\\Sentinel\\.nuget\\packages\\",
+      "outputPath": "E:\\C#\\Visual Studio\\Power-Plan_Manager-Ready To Publish - Final\\App_Packger_proj\\obj\\",
+      "projectStyle": "PackageReference",
+      "UsingMicrosoftNETSdk": false,
+      "fallbackFolders": [
+        "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
+      ],
+      "configFilePaths": [
+        "C:\\Users\\Sentinel\\AppData\\Roaming\\NuGet\\NuGet.Config",
+        "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.FallbackLocation.config",
+        "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
+      ],
+      "originalTargetFrameworks": [
+        "net451"
+      ],
+      "sources": {
+        "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
+        "E:\\C#\\Extra Packages (NuGet) (Visual Studio)": {},
+        "https://api.nuget.org/v3/index.json": {}
+      },
+      "frameworks": {
+        "uap10.0.17763": {
+          "targetAlias": "net451",
+          "projectReferences": {
+            "E:\\C#\\Visual Studio\\Power-Plan_Manager-Ready To Publish - Final\\Power-Plan_Manager-Take_8\\Power-Plan_Manager-Take_8.csproj": {
+              "projectPath": "E:\\C#\\Visual Studio\\Power-Plan_Manager-Ready To Publish - Final\\Power-Plan_Manager-Take_8\\Power-Plan_Manager-Take_8.csproj"
+            }
+          }
+        }
+      },
+      "warningProperties": {
+        "noWarn": [
+          "NU1702"
+        ]
+      },
+      "restoreAuditProperties": {
+        "enableAudit": "true",
+        "auditLevel": "low",
+        "auditMode": "direct"
+      },
+      "SdkAnalysisLevel": "9.0.300"
+    },
+    "frameworks": {
+      "uap10.0.17763": {
+        "targetAlias": "net451",
+        "dependencies": {
+          "Microsoft.Windows.SDK.BuildTools": {
+            "suppressParent": "All",
+            "target": "Package",
+            "version": "[10.0.22621.756, )"
+          }
+        },
+        "imports": [
+          "netcoreapp3.1",
+          "netcoreapp3.0",
+          "netcoreapp2.0",
+          "net462",
+          "net47",
+          "net471",
+          "net472",
+          "net48",
+          "net481",
+          "net10.0-windows10.0.22621",
+          "net461"
+        ],
+        "assetTargetFallback": true,
+        "warn": true
+      }
+    },
+    "runtimes": {
+      "win10-arm": {
+        "#import": []
+      },
+      "win10-arm-aot": {
+        "#import": []
+      },
+      "win10-arm64-aot": {
+        "#import": []
+      },
+      "win10-x64": {
+        "#import": []
+      },
+      "win10-x64-aot": {
+        "#import": []
+      },
+      "win10-x86": {
+        "#import": []
+      },
+      "win10-x86-aot": {
+        "#import": []
+      }
+    }
+  },
+  "logs": [
+    {
+      "code": "NU1301",
+      "level": "Error",
+      "message": "The local source 'E:\\C#\\Extra Packages (NuGet) (Visual Studio)' doesn't exist.",
+      "libraryId": "Microsoft.Windows.SDK.BuildTools"
+    }
+  ]
+}

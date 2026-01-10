@@ -1,0 +1,15 @@
+E:\C#\Visual Studio\Power-Plan_Manager-Ready To Publish - Final\App_Packger_proj\Images\SplashScreen.scale-200.png
+E:\C#\Visual Studio\Power-Plan_Manager-Ready To Publish - Final\App_Packger_proj\Images\LockScreenLogo.scale-200.png
+E:\C#\Visual Studio\Power-Plan_Manager-Ready To Publish - Final\App_Packger_proj\Images\Square150x150Logo.scale-200.png
+E:\C#\Visual Studio\Power-Plan_Manager-Ready To Publish - Final\App_Packger_proj\Images\Square44x44Logo.scale-200.png
+E:\C#\Visual Studio\Power-Plan_Manager-Ready To Publish - Final\App_Packger_proj\Images\Square44x44Logo.targetsize-24_altform-unplated.png
+E:\C#\Visual Studio\Power-Plan_Manager-Ready To Publish - Final\App_Packger_proj\Images\StoreLogo.png
+E:\C#\Visual Studio\Power-Plan_Manager-Ready To Publish - Final\App_Packger_proj\Images\Wide310x150Logo.scale-200.png
+E:\C#\Visual Studio\Power-Plan_Manager-Ready To Publish - Final\App_Packger_proj\bin\AnyCPU\Release\resources.pri
+E:\C#\Visual Studio\Power-Plan_Manager-Ready To Publish - Final\Power-Plan_Manager-Take_8\bin\Release\net6.0-windows\Power-Plan_Manager-Take_8.deps.json
+E:\C#\Visual Studio\Power-Plan_Manager-Ready To Publish - Final\Power-Plan_Manager-Take_8\obj\Release\net6.0-windows\apphost.exe
+E:\C#\Visual Studio\Power-Plan_Manager-Ready To Publish - Final\Power-Plan_Manager-Take_8\Papirus-Team-Papirus-Apps-Preferences-system-login.ico
+E:\C#\Visual Studio\Power-Plan_Manager-Ready To Publish - Final\Power-Plan_Manager-Take_8\bin\Release\net6.0-windows\Power-Plan_Manager-Take_8.runtimeconfig.json
+E:\C#\Visual Studio\Power-Plan_Manager-Ready To Publish - Final\Power-Plan_Manager-Take_8\bin\Release\net6.0-windows\Power-Plan_Manager-Take_8.dll
+E:\C#\Visual Studio\Power-Plan_Manager-Ready To Publish - Final\Power-Plan_Manager-Take_8\bin\Release\net6.0-windows\Power-Plan_Manager-Take_8.dll.config
+E:\C#\Visual Studio\Power-Plan_Manager-Ready To Publish - Final\Power-Plan_Manager-Take_8\bin\Release\net6.0-windows\Power-Plan_Manager-Take_8.pdb
