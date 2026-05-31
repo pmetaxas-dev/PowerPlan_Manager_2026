@@ -2,11 +2,13 @@
 
 > Automatically switches your Windows power plan based on user activity — saving energy when you're away and restoring performance the moment you return.
 
-[![Platform](https://img.shields.io/badge/platform-Windows%2010%2F11-blue)](https://apps.microsoft.com)
+[![Platform](https://img.shields.io/badge/platform-Windows%2010%2F11-blue)](https://apps.microsoft.com/detail/9p87s5vf93vq?hl=en-US&gl=US)
 [![Framework](https://img.shields.io/badge/.NET-8.0-purple)](https://dotnet.microsoft.com)
 [![Version](https://img.shields.io/badge/version-2.0.0-green)](https://github.com/pmetaxas-dev/PowerPlan_Manager_2026/releases)
 [![Tests](https://img.shields.io/badge/tests-57%20passing-brightgreen)](#testing)
-[![Store](https://img.shields.io/badge/Microsoft%20Store-Available-blue)](https://apps.microsoft.com)
+[![Store](https://img.shields.io/badge/Microsoft%20Store-Available-blue)](https://apps.microsoft.com/detail/9p87s5vf93vq?hl=en-US&gl=US)
+
+### ?? [Download on the Microsoft Store](https://apps.microsoft.com/detail/9p87s5vf93vq?hl=en-US&gl=US)
 
 ---
 
@@ -115,7 +117,9 @@ PowerPlan_Manager_2026/
 ## Installation
 
 ### Via Microsoft Store *(recommended)*
-Search for **PowerPlan Manager** in the Microsoft Store, or use the direct link on the Store page.
+Search for **PowerPlan Manager** in the Microsoft Store, or click the link below:
+
+**?? [https://apps.microsoft.com/detail/9p87s5vf93vq?hl=en-US&gl=US](https://apps.microsoft.com/detail/9p87s5vf93vq?hl=en-US&gl=US)**
 
 ### Via MSIX Package
 1. Download the latest `App_Packger_proj_2.0.0.0_x86_x64_bundle.msixbundle`
@@ -234,7 +238,7 @@ Clear-Content "$env:APPDATA\PowerPlanManager\log.txt"
 ## Author
 
 **Panos Metaxas**
-- Microsoft Store: [PowerPlan Manager](https://apps.microsoft.com)
+- Microsoft Store: [PowerPlan Manager](https://apps.microsoft.com/detail/9p87s5vf93vq?hl=en-US&gl=US)
 - GitHub: [pmetaxas-dev](https://github.com/pmetaxas-dev)
 
 ---
