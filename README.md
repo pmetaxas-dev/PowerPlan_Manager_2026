@@ -1,6 +1,6 @@
-# PowerPlan Manager
+ï»¿# PowerPlan Manager
 
-> Automatically switches your Windows power plan based on user activity — saving energy when you're away and restoring performance the moment you return.
+> Automatically switches your Windows power plan based on user activity ï¿½ saving energy when you're away and restoring performance the moment you return.
 
 [![Platform](https://img.shields.io/badge/platform-Windows%2010%2F11-blue)](https://apps.microsoft.com/detail/9p87s5vf93vq?hl=en-US&gl=US)
 [![Framework](https://img.shields.io/badge/.NET-8.0-purple)](https://dotnet.microsoft.com)
@@ -8,7 +8,7 @@
 [![Tests](https://img.shields.io/badge/tests-57%20passing-brightgreen)](#testing)
 [![Store](https://img.shields.io/badge/Microsoft%20Store-Available-blue)](https://apps.microsoft.com/detail/9p87s5vf93vq?hl=en-US&gl=US)
 
-### ?? [Download on the Microsoft Store](https://apps.microsoft.com/detail/9p87s5vf93vq?hl=en-US&gl=US)
+### [Download on the Microsoft Store](https://apps.microsoft.com/detail/9p87s5vf93vq?hl=en-US&gl=US)
 
 ---
 
@@ -25,15 +25,15 @@ No manual intervention needed. It runs silently in the background and starts aut
 
 ## Features
 
-- ? **Automatic idle detection** — detects inactivity via last user input timestamp
-- ? **CPU throttling on idle** — creates a temporary duplicate of Energy Saver with 50% max processor state
-- ? **Instant restore on activity** — detects input within 5 seconds and switches back
-- ? **System tray operation** — minimizes to tray, never gets in your way
-- ? **Ryzen Universal support** — detects and uses the 1usmus Ryzen Universal power plan if available
-- ? **Enable / Disable toggle** — checkbox to pause management without closing the app
-- ? **Auto-start with Windows** — registered as a startup task via MSIX packaging
-- ? **File-based logging** — timestamped log at `%APPDATA%\PowerPlanManager\log.txt`
-- ? **Thread-safe async operations** — all power plan switches run off the UI thread
+- ? **Automatic idle detection** ï¿½ detects inactivity via last user input timestamp
+- ? **CPU throttling on idle** ï¿½ creates a temporary duplicate of Energy Saver with 50% max processor state
+- ? **Instant restore on activity** ï¿½ detects input within 5 seconds and switches back
+- ? **System tray operation** ï¿½ minimizes to tray, never gets in your way
+- ? **Ryzen Universal support** ï¿½ detects and uses the 1usmus Ryzen Universal power plan if available
+- ? **Enable / Disable toggle** ï¿½ checkbox to pause management without closing the app
+- ? **Auto-start with Windows** ï¿½ registered as a startup task via MSIX packaging
+- ? **File-based logging** ï¿½ timestamped log at `%APPDATA%\PowerPlanManager\log.txt`
+- ? **Thread-safe async operations** ï¿½ all power plan switches run off the UI thread
 
 ---
 
@@ -43,13 +43,13 @@ No manual intervention needed. It runs silently in the background and starts aut
 User is active
      ?
      ?
-[idleCheckTimer] — fires after 90 seconds of inactivity
+[idleCheckTimer] ï¿½ fires after 90 seconds of inactivity
      ?
      ?
 Duplicate Energy Saver scheme ? cap CPU to 50% ? activate "PPM-Idle-Throttle"
      ?
      ?
-[userInputCheckTimer] — polls every 5 seconds for new input
+[userInputCheckTimer] ï¿½ polls every 5 seconds for new input
      ?
      ?
 Input detected ? delete throttle duplicate ? restore original power plan
@@ -217,7 +217,7 @@ Clear-Content "$env:APPDATA\PowerPlanManager\log.txt"
 - Make sure the **Enable** checkbox in the main window is checked
 
 ### App not starting with Windows
-- Reinstall via MSIX — the startup task is registered automatically by the package
+- Reinstall via MSIX ï¿½ the startup task is registered automatically by the package
 - Check Task Manager ? Startup Apps for "Power-Plan Manager"
 
 ### App not visible
@@ -245,4 +245,4 @@ Clear-Content "$env:APPDATA\PowerPlanManager\log.txt"
 
 ## License
 
-MIT License — see [LICENSE](LICENSE) for details.
+MIT License ï¿½ see [LICENSE](LICENSE) for details.
