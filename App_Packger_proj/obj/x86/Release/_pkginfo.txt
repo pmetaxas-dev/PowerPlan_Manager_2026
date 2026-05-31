@@ -1,1 +1,1 @@
-E:\C#\Visual Studio\Power-Plan_Manager-Ready To Publish - Final\App_Packger_proj\AppPackages\App_Packger_proj_1.5.3.0_Test\App_Packger_proj_1.5.3.0_x86.msixbundle
+E:\2026_projects!\PowerPlan_Manager_2026\App_Packger_proj\AppPackages\App_Packger_proj_2.0.0.0_Test\App_Packger_proj_2.0.0.0_x86_x64.msixbundle

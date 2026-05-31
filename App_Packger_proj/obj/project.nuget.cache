@@ -1,18 +1,10 @@
 {
   "version": 2,
-  "dgSpecHash": "w6JC61NfeMM=",
-  "success": false,
-  "projectFilePath": "E:\\C#\\Visual Studio\\Power-Plan_Manager-Ready To Publish - Final\\App_Packger_proj\\App_Packger_proj.wapproj",
-  "expectedPackageFiles": [],
-  "logs": [
-    {
-      "code": "NU1301",
-      "level": "Error",
-      "message": "The local source 'E:\\C#\\Extra Packages (NuGet) (Visual Studio)' doesn't exist.",
-      "projectPath": "E:\\C#\\Visual Studio\\Power-Plan_Manager-Ready To Publish - Final\\App_Packger_proj\\App_Packger_proj.wapproj",
-      "filePath": "E:\\C#\\Visual Studio\\Power-Plan_Manager-Ready To Publish - Final\\App_Packger_proj\\App_Packger_proj.wapproj",
-      "libraryId": "Microsoft.Windows.SDK.BuildTools",
-      "targetGraphs": []
-    }
-  ]
+  "dgSpecHash": "Cmv2lWLXKTM=",
+  "success": true,
+  "projectFilePath": "E:\\2026_projects!\\PowerPlan_Manager_2026\\App_Packger_proj\\App_Packger_proj.wapproj",
+  "expectedPackageFiles": [
+    "C:\\Users\\Sentinel\\.nuget\\packages\\microsoft.windows.sdk.buildtools\\10.0.22621.756\\microsoft.windows.sdk.buildtools.10.0.22621.756.nupkg.sha512"
+  ],
+  "logs": []
 }

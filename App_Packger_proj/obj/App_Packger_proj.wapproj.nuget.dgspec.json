@@ -1,17 +1,17 @@
 {
   "format": 1,
   "restore": {
-    "E:\\C#\\Visual Studio\\Power-Plan_Manager-Ready To Publish - Final\\App_Packger_proj\\App_Packger_proj.wapproj": {}
+    "E:\\2026_projects!\\PowerPlan_Manager_2026\\App_Packger_proj\\App_Packger_proj.wapproj": {}
   },
   "projects": {
-    "E:\\C#\\Visual Studio\\Power-Plan_Manager-Ready To Publish - Final\\App_Packger_proj\\App_Packger_proj.wapproj": {
+    "E:\\2026_projects!\\PowerPlan_Manager_2026\\App_Packger_proj\\App_Packger_proj.wapproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "E:\\C#\\Visual Studio\\Power-Plan_Manager-Ready To Publish - Final\\App_Packger_proj\\App_Packger_proj.wapproj",
+        "projectUniqueName": "E:\\2026_projects!\\PowerPlan_Manager_2026\\App_Packger_proj\\App_Packger_proj.wapproj",
         "projectName": "App_Packger_proj",
-        "projectPath": "E:\\C#\\Visual Studio\\Power-Plan_Manager-Ready To Publish - Final\\App_Packger_proj\\App_Packger_proj.wapproj",
+        "projectPath": "E:\\2026_projects!\\PowerPlan_Manager_2026\\App_Packger_proj\\App_Packger_proj.wapproj",
         "packagesPath": "C:\\Users\\Sentinel\\.nuget\\packages\\",
-        "outputPath": "E:\\C#\\Visual Studio\\Power-Plan_Manager-Ready To Publish - Final\\App_Packger_proj\\obj\\",
+        "outputPath": "E:\\2026_projects!\\PowerPlan_Manager_2026\\App_Packger_proj\\obj\\",
         "projectStyle": "PackageReference",
         "UsingMicrosoftNETSdk": false,
         "fallbackFolders": [
@@ -27,15 +27,14 @@
         ],
         "sources": {
           "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
-          "E:\\C#\\Extra Packages (NuGet) (Visual Studio)": {},
           "https://api.nuget.org/v3/index.json": {}
         },
         "frameworks": {
           "uap10.0.17763": {
             "targetAlias": "net451",
             "projectReferences": {
-              "E:\\C#\\Visual Studio\\Power-Plan_Manager-Ready To Publish - Final\\Power-Plan_Manager-Take_8\\Power-Plan_Manager-Take_8.csproj": {
-                "projectPath": "E:\\C#\\Visual Studio\\Power-Plan_Manager-Ready To Publish - Final\\Power-Plan_Manager-Take_8\\Power-Plan_Manager-Take_8.csproj"
+              "E:\\2026_projects!\\PowerPlan_Manager_2026\\Power-Plan_Manager-2.0\\Power-Plan_Manager-Take_8.csproj": {
+                "projectPath": "E:\\2026_projects!\\PowerPlan_Manager_2026\\Power-Plan_Manager-2.0\\Power-Plan_Manager-Take_8.csproj"
               }
             }
           }
@@ -72,7 +71,7 @@
             "net472",
             "net48",
             "net481",
-            "net10.0-windows10.0.22621",
+            "net10.0-windows10.0.26100",
             "net461"
           ],
           "assetTargetFallback": true,
@@ -103,14 +102,14 @@
         }
       }
     },
-    "E:\\C#\\Visual Studio\\Power-Plan_Manager-Ready To Publish - Final\\Power-Plan_Manager-Take_8\\Power-Plan_Manager-Take_8.csproj": {
-      "version": "1.0.0",
+    "E:\\2026_projects!\\PowerPlan_Manager_2026\\Power-Plan_Manager-2.0\\Power-Plan_Manager-Take_8.csproj": {
+      "version": "2.0.0",
       "restore": {
-        "projectUniqueName": "E:\\C#\\Visual Studio\\Power-Plan_Manager-Ready To Publish - Final\\Power-Plan_Manager-Take_8\\Power-Plan_Manager-Take_8.csproj",
-        "projectName": "Power-Plan_Manager-Take_8",
-        "projectPath": "E:\\C#\\Visual Studio\\Power-Plan_Manager-Ready To Publish - Final\\Power-Plan_Manager-Take_8\\Power-Plan_Manager-Take_8.csproj",
+        "projectUniqueName": "E:\\2026_projects!\\PowerPlan_Manager_2026\\Power-Plan_Manager-2.0\\Power-Plan_Manager-Take_8.csproj",
+        "projectName": "Power-Plan_Manager-2.0",
+        "projectPath": "E:\\2026_projects!\\PowerPlan_Manager_2026\\Power-Plan_Manager-2.0\\Power-Plan_Manager-Take_8.csproj",
         "packagesPath": "C:\\Users\\Sentinel\\.nuget\\packages\\",
-        "outputPath": "E:\\C#\\Visual Studio\\Power-Plan_Manager-Ready To Publish - Final\\Power-Plan_Manager-Take_8\\obj\\",
+        "outputPath": "E:\\2026_projects!\\PowerPlan_Manager_2026\\Power-Plan_Manager-2.0\\obj\\",
         "projectStyle": "PackageReference",
         "fallbackFolders": [
           "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages",
@@ -126,7 +125,6 @@
         ],
         "sources": {
           "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
-          "E:\\C#\\Extra Packages (NuGet) (Visual Studio)": {},
           "https://api.nuget.org/v3/index.json": {}
         },
         "frameworks": {
@@ -161,6 +159,32 @@
           ],
           "assetTargetFallback": true,
           "warn": true,
+          "downloadDependencies": [
+            {
+              "name": "Microsoft.AspNetCore.App.Runtime.win-x64",
+              "version": "[8.0.27, 8.0.27]"
+            },
+            {
+              "name": "Microsoft.AspNetCore.App.Runtime.win-x86",
+              "version": "[8.0.27, 8.0.27]"
+            },
+            {
+              "name": "Microsoft.NETCore.App.Runtime.win-x64",
+              "version": "[8.0.27, 8.0.27]"
+            },
+            {
+              "name": "Microsoft.NETCore.App.Runtime.win-x86",
+              "version": "[8.0.27, 8.0.27]"
+            },
+            {
+              "name": "Microsoft.WindowsDesktop.App.Runtime.win-x64",
+              "version": "[8.0.27, 8.0.27]"
+            },
+            {
+              "name": "Microsoft.WindowsDesktop.App.Runtime.win-x86",
+              "version": "[8.0.27, 8.0.27]"
+            }
+          ],
           "frameworkReferences": {
             "Microsoft.NETCore.App": {
               "privateAssets": "all"
@@ -169,7 +193,15 @@
               "privateAssets": "none"
             }
           },
-          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\9.0.304/PortableRuntimeIdentifierGraph.json"
+          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\9.0.314/PortableRuntimeIdentifierGraph.json"
+        }
+      },
+      "runtimes": {
+        "win-x64": {
+          "#import": []
+        },
+        "win-x86": {
+          "#import": []
         }
       }
     }

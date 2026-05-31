@@ -6,7 +6,7 @@
     <autoResourcePackage qualifier="DXFeatureLevel" />
     <omitSchemaFromResourcePacks />
   </packaging>
-  <index root="\" startIndexAt="E:\C#\Visual Studio\Power-Plan_Manager-Ready To Publish - Final\App_Packger_proj\bin\x86\Release\resources.pri">
+  <index root="\" startIndexAt="E:\2026_projects!\PowerPlan_Manager_2026\App_Packger_proj\bin\x86\Release\resources.pri">
     <default>
       <qualifier name="Language" value="en-US" />
       <qualifier name="Contrast" value="standard" />

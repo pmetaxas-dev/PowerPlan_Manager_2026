@@ -5,7 +5,7 @@
     <autoResourcePackage qualifier="Scale" />
     <autoResourcePackage qualifier="DXFeatureLevel" />
   </packaging>
-  <index root="\" startIndexAt="E:\C#\Visual Studio\Power-Plan_Manager-Ready To Publish - Final\App_Packger_proj\obj\x86\Release\Upload\filtered.package.layout.resfiles">
+  <index root="\" startIndexAt="E:\2026_projects!\PowerPlan_Manager_2026\App_Packger_proj\obj\x86\Release\Upload\filtered.package.layout.resfiles">
     <default>
       <qualifier name="Language" value="en-US" />
       <qualifier name="Contrast" value="standard" />
