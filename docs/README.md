@@ -184,7 +184,7 @@ public const string EnergySaver         = "a1841308-3541-4fab-bc81-f71556f20b4a"
 public const string RyzenUniversal      = "3af9b8d9-7c97-431d-ad78-34af276e0785";
 ```
 
-## Testing
+## Tests
 
 ### Test Categories
 - **ConstantsTests** (13) - All passing ✅ - GUID validation
