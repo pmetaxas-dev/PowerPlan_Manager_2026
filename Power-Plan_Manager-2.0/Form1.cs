@@ -52,6 +52,9 @@ namespace Power_Plan_Manager_Take_8
 
             idleChecker = new IdleChecker(systemActivePlan);
 
+            // Run redundant-powerplan cleanup once on startup (background)
+            try { idleChecker.RemoveRedundantEnergySaverPlans(); } catch (Exception ex) { Logger.LogException("Form1.RemoveRedundantEnergySaverPlans", ex); }
+
             // Check if it's the first run
             if (Properties.Settings.Default.FirstRun == 1)
             {

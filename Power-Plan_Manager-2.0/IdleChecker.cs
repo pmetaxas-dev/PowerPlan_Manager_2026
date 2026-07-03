@@ -2,6 +2,10 @@
 using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using System.Diagnostics;
+using System.Text.RegularExpressions;
+using System.Text;
+using System.Collections.Generic;
 
 namespace Power_Plan_Manager_Take_8
 {
@@ -31,6 +35,12 @@ namespace Power_Plan_Manager_Take_8
         [DllImport("powrprof.dll")]
         static extern uint PowerWriteDCValueIndex(IntPtr RootPowerKey, ref Guid SchemeGuid, ref Guid SubGroupOfPowerSettingsGuid, ref Guid PowerSettingGuid, uint DcValueIndex);
 
+        [DllImport("powrprof.dll")]
+        static extern uint PowerReadACValueIndex(IntPtr RootPowerKey, ref Guid SchemeGuid, ref Guid SubGroupOfPowerSettingsGuid, ref Guid PowerSettingGuid, out uint AcValueIndex);
+
+        [DllImport("powrprof.dll")]
+        static extern uint PowerReadDCValueIndex(IntPtr RootPowerKey, ref Guid SchemeGuid, ref Guid SubGroupOfPowerSettingsGuid, ref Guid PowerSettingGuid, out uint DcValueIndex);
+
         [DllImport("powrprof.dll", CharSet = CharSet.Unicode)]
         static extern uint PowerWriteFriendlyName(IntPtr RootPowerKey, ref Guid SchemeGuid, IntPtr SubGroupOfPowerSettingsGuid, IntPtr PowerSettingGuid, string Buffer, uint BufferSize);
 
@@ -44,6 +54,198 @@ namespace Power_Plan_Manager_Take_8
         {
             public uint cbSize;
             public uint dwTime;
+        }
+
+        // Elevated deletion is intentionally omitted. Deletions should succeed via PowerDeleteScheme API.
+
+        /// <summary>
+        /// Removes redundant Energy Saver / PPM throttle power schemes by enumerating
+        /// installed power schemes (via `powercfg /list`) and deleting any non-original
+        /// schemes that match the Energy Saver friendly name or the app-created name
+        /// "PPM-Idle-Throttle". Skips the original Energy Saver GUID.
+        /// This runs in a background task and logs actions.
+        /// </summary>
+        public void RemoveRedundantEnergySaverPlans()
+        {
+            if (disposed) return;
+
+            Task.Run(() =>
+            {
+                try
+                {
+                    string output = RunPowerCfg("/list");
+                    Logger.Log($"RemoveRedundantEnergySaverPlans: powercfg /list output length={output?.Length ?? 0}");
+                    if (string.IsNullOrWhiteSpace(output))
+                    {
+                        Logger.Log("RemoveRedundantEnergySaverPlans: no output from powercfg /list");
+                        return;
+                    }
+                    Logger.Log("RemoveRedundantEnergySaverPlans: powercfg /list output:\n" + output);
+
+                    // Regex to capture lines like: Power Scheme GUID: GUID  (Name)
+                    // Handles GUIDs with or without braces and optional trailing asterisk for active scheme
+                    var rx = new Regex("Power Scheme GUID:\\s*\\{?([0-9a-fA-F\\-]+)\\}?\\s*\\(?\\s*(.*?)\\s*\\)?\\s*(?:\\*)?", RegexOptions.IgnoreCase);
+                    var matches = rx.Matches(output);
+                    Logger.Log($"RemoveRedundantEnergySaverPlans: regex matched {matches.Count} lines");
+
+                    string activeGuid = GetSystemActivePlan();
+
+                    var candidates = new List<(string guid, string name)>();
+                    foreach (Match m in matches)
+                    {
+                        string guid = m.Groups[1].Value.Trim();
+                        string name = m.Groups[2].Value.Trim();
+                        Logger.Log($"RemoveRedundantEnergySaverPlans: found entry guid='{guid}' name='{name}'");
+
+                        // Normalize for comparison
+                        string nameLower = name.ToLowerInvariant();
+
+                        bool isPpmName = string.Equals(name, "PPM-Idle-Throttle", StringComparison.OrdinalIgnoreCase);
+                        bool isEnergySaverName = nameLower.Contains("power saver") || nameLower.Contains("energy saver") || nameLower.Contains("power-saver");
+
+                        if (!string.IsNullOrWhiteSpace(name))
+                        {
+                            if ((isPpmName || isEnergySaverName) && !string.Equals(guid, Constants.EnergySaver, StringComparison.OrdinalIgnoreCase))
+                            {
+                                candidates.Add((guid, name));
+                            }
+                        }
+                        else
+                        {
+                            // Unnamed schemes: add for probing unless they are known canonical plans
+                            if (!string.Equals(guid, Constants.EnergySaver, StringComparison.OrdinalIgnoreCase)
+                                && !string.Equals(guid, Constants.HighPerformance, StringComparison.OrdinalIgnoreCase)
+                                && !string.Equals(guid, Constants.UltimatePerformance, StringComparison.OrdinalIgnoreCase)
+                                && !string.Equals(guid, Constants.RyzenUniversal, StringComparison.OrdinalIgnoreCase))
+                            {
+                                candidates.Add((guid, name));
+                            }
+                        }
+                    }
+
+                    if (candidates.Count == 0)
+                    {
+                        Logger.Log("RemoveRedundantEnergySaverPlans: no candidates found.");
+                        return;
+                    }
+
+                    // Try to delete candidates using the API first. Collect those that still need elevated deletion.
+                    var needElevation = new List<string>();
+                    foreach (var (guid, name) in candidates)
+                    {
+                        // If the friendly name is empty, try to detect if this scheme is a 50% throttle duplicate
+                        bool considerForDeletion = true;
+                        if (string.IsNullOrWhiteSpace(name))
+                        {
+                            considerForDeletion = false;
+                            try
+                            {
+                                if (Guid.TryParse(guid, out Guid probeGuid))
+                                {
+                                    uint acVal;
+                                    uint dcVal;
+                                    Guid subgroupLocal = GUID_PROCESSOR_SUBGROUP;
+                                    Guid settingLocal = GUID_PROCESSOR_THROTTLE_MAXIMUM;
+                                    uint r1 = PowerReadACValueIndex(IntPtr.Zero, ref probeGuid, ref subgroupLocal, ref settingLocal, out acVal);
+                                    uint r2 = PowerReadDCValueIndex(IntPtr.Zero, ref probeGuid, ref subgroupLocal, ref settingLocal, out dcVal);
+                                    Logger.Log($"RemoveRedundantEnergySaverPlans: ReadAC/DC for {probeGuid} -> r1={r1} ac={acVal}, r2={r2} dc={dcVal}");
+                                    // If either AC or DC reads successfully and equals 50, treat as candidate
+                                    if ((r1 == 0 && acVal == 50) || (r2 == 0 && dcVal == 50))
+                                    {
+                                        considerForDeletion = true;
+                                        Logger.Log($"RemoveRedundantEnergySaverPlans: {probeGuid} identified as throttle duplicate (50%).");
+                                    }
+                                }
+                            }
+                            catch (Exception ex)
+                            {
+                                Logger.LogException("RemoveRedundantEnergySaverPlans.Probe", ex);
+                            }
+                        }
+
+                        if (!considerForDeletion)
+                        {
+                            Logger.Log($"Skipping {guid} ('{name}') - not identified as duplicate.");
+                            continue;
+                        }
+                        try
+                        {
+                            Logger.Log($"Attempting to delete redundant power scheme {guid} ('{name}') via API");
+
+                            // If it's the currently active scheme, switch to a safe plan first
+                            if (string.Equals(guid, activeGuid, StringComparison.OrdinalIgnoreCase))
+                            {
+                                Logger.Log($"Target is active scheme; switching to {Constants.HighPerformance} before deletion");
+                                var t = ChangePowerPlan(Constants.HighPerformance);
+                                t?.Wait(1000);
+                            }
+
+                            if (Guid.TryParse(guid, out Guid deleteGuid))
+                            {
+                                uint delRes = PowerDeleteScheme(IntPtr.Zero, ref deleteGuid);
+                                Logger.Log($"PowerDeleteScheme result for {deleteGuid}: {delRes}");
+                                if (delRes != 0)
+                                {
+                                    needElevation.Add(guid);
+                                }
+                            }
+                            else
+                            {
+                                // parsing failed, try powercfg (may still require elevation)
+                                string deleteOutput = RunPowerCfg($"/delete {guid}");
+                                Logger.Log($"powercfg delete output for {guid}: {deleteOutput}");
+                                // If output indicates failure, schedule for elevation
+                                if (deleteOutput.IndexOf("Access is denied", StringComparison.OrdinalIgnoreCase) >= 0 || deleteOutput.IndexOf("failed", StringComparison.OrdinalIgnoreCase) >= 0)
+                                    needElevation.Add(guid);
+                            }
+                        }
+                        catch (Exception ex)
+                        {
+                            Logger.LogException("RemoveRedundantEnergySaverPlans.Delete", ex);
+                            needElevation.Add(guid);
+                        }
+                    }
+
+                    if (needElevation.Count > 0)
+                    {
+                        // Log schemes that could not be deleted via API. Do not prompt for elevation in normal runs.
+                        Logger.Log($"Could not delete {needElevation.Count} schemes via API; skipping elevation. GUIDs: {string.Join(",", needElevation)}");
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Logger.LogException("RemoveRedundantEnergySaverPlans", ex);
+                }
+            });
+        }
+
+        private string RunPowerCfg(string args)
+        {
+            try
+            {
+                var psi = new ProcessStartInfo("powercfg", args)
+                {
+                    RedirectStandardOutput = true,
+                    RedirectStandardError = true,
+                    UseShellExecute = false,
+                    CreateNoWindow = true,
+                };
+
+                using (var p = Process.Start(psi))
+                {
+                    if (p == null) return string.Empty;
+                    var sb = new StringBuilder();
+                    sb.AppendLine(p.StandardOutput.ReadToEnd());
+                    sb.AppendLine(p.StandardError.ReadToEnd());
+                    p.WaitForExit();
+                    return sb.ToString();
+                }
+            }
+            catch (Exception ex)
+            {
+                Logger.LogException("RunPowerCfg", ex);
+                return string.Empty;
+            }
         }
 
         /// <summary>
@@ -201,8 +403,9 @@ namespace Power_Plan_Manager_Take_8
             {
                 try
                 {
-                    // Clean up any previous duplicate first
+                    // Clean up any previous duplicate first (in-memory and persisted from prior runs)
                     CleanupIdleThrottleDuplicate();
+                    CleanupPersistedIdleThrottleDuplicate();
 
                     Guid sourcePlan = new Guid(Constants.EnergySaver);
                     uint result = PowerDuplicateScheme(IntPtr.Zero, ref sourcePlan, out Guid newScheme);
@@ -229,6 +432,16 @@ namespace Power_Plan_Manager_Take_8
                         lock (_throttleLock)
                         {
                             _idleThrottleSchemeGuid = newScheme;
+                        }
+                        // Persist the GUID so future app restarts can clean it up
+                        try
+                        {
+                            Properties.Settings.Default["IdleThrottleGuid"] = newScheme.ToString();
+                            Properties.Settings.Default.Save();
+                        }
+                        catch (Exception ex)
+                        {
+                            Logger.LogException("ActivateIdleThrottlePlan.PersistIdleGuid", ex);
                         }
                         Logger.Log($"Idle throttle plan activated (50% max CPU): {newScheme}");
                     }
@@ -289,6 +502,58 @@ namespace Power_Plan_Manager_Take_8
                 Guid g = toDelete.Value;
                 uint result = PowerDeleteScheme(IntPtr.Zero, ref g);
                 Logger.Log($"Deleted idle throttle duplicate {g}: result={result}");
+            }
+            else
+            {
+                // No in-memory duplicate; attempt to remove any persisted GUID from previous runs
+                try
+                {
+                    var prop = Properties.Settings.Default.Properties["IdleThrottleGuid"];
+                    if (prop != null)
+                    {
+                        var stored = (string?)Properties.Settings.Default["IdleThrottleGuid"];
+                        if (!string.IsNullOrWhiteSpace(stored) && Guid.TryParse(stored, out Guid persisted))
+                        {
+                            uint result = PowerDeleteScheme(IntPtr.Zero, ref persisted);
+                            Logger.Log($"Deleted persisted idle throttle duplicate {persisted}: result={result}");
+                        }
+                        Properties.Settings.Default["IdleThrottleGuid"] = string.Empty;
+                        Properties.Settings.Default.Save();
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Logger.LogException("CleanupIdleThrottleDuplicate.Persisted", ex);
+                }
+            }
+        }
+
+        /// <summary>
+        /// Attempts to clean up a persisted idle throttle duplicate left from previous runs.
+        /// This prevents accumulation of duplicate power schemes across restarts.
+        /// </summary>
+        private void CleanupPersistedIdleThrottleDuplicate()
+        {
+            try
+            {
+                var prop = Properties.Settings.Default.Properties["IdleThrottleGuid"];
+                if (prop == null) return;
+
+                var stored = (string?)Properties.Settings.Default["IdleThrottleGuid"];
+                if (string.IsNullOrWhiteSpace(stored)) return;
+
+                if (Guid.TryParse(stored, out Guid persisted))
+                {
+                    uint result = PowerDeleteScheme(IntPtr.Zero, ref persisted);
+                    Logger.Log($"CleanupPersistedIdleThrottleDuplicate deleted {persisted}: result={result}");
+                }
+
+                Properties.Settings.Default["IdleThrottleGuid"] = string.Empty;
+                Properties.Settings.Default.Save();
+            }
+            catch (Exception ex)
+            {
+                Logger.LogException("CleanupPersistedIdleThrottleDuplicate", ex);
             }
         }
 

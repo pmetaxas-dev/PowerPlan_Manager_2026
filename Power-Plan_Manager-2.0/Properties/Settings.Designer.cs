@@ -58,5 +58,17 @@ namespace Power_Plan_Manager_Take_8.Properties {
                 this["Enabled"] = value;
             }
         }
+
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("")]
+        public string IdleThrottleGuid {
+            get {
+                return ((string)(this["IdleThrottleGuid"]));
+            }
+            set {
+                this["IdleThrottleGuid"] = value;
+            }
+        }
     }
 }
