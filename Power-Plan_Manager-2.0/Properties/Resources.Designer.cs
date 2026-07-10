@@ -59,5 +59,15 @@ namespace Power_Plan_Manager_Take_8.Properties {
                 resourceCulture = value;
             }
         }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap About_Window_Notes_update2_ {
+            get {
+                object obj = ResourceManager.GetObject("About Window Notes(update2)", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
     }
 }

@@ -55,7 +55,7 @@
     <build:Item Name="TargetFrameworkMoniker" Value=".NETFramework,Version=v4.5.1" />
     <build:Item Name="VisualStudio" Version="17.0" />
     <build:Item Name="VisualStudioEdition" Value="Microsoft Visual Studio Professional 2022" />
-    <build:Item Name="OperatingSystem" Version="10.0.26100.7689 (WinBuild.160101.0800)" />
+    <build:Item Name="OperatingSystem" Version="10.0.26100.8457 (WinBuild.160101.0800)" />
     <build:Item Name="Microsoft.Build.AppxPackage.dll" Version="17.14.40598.3191" />
     <build:Item Name="ProjectGUID" Value="6fd9c2f9-a32d-4b92-b1e5-29d8e19b3d6e" />
     <build:Item Name="makepri.exe" Version="10.0.22621.755 (WinBuild.160101.0800)" />

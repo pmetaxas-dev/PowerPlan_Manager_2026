@@ -45,11 +45,11 @@
             // 
             // button1
             // 
-            button1.Font = new Font("Segoe UI", 9F, FontStyle.Regular, GraphicsUnit.Point);
-            button1.Location = new Point(14, 108);
-            button1.Margin = new Padding(5, 6, 5, 6);
+            button1.Font = new Font("Segoe UI", 9F);
+            button1.Location = new Point(12, 90);
+            button1.Margin = new Padding(4, 5, 4, 5);
             button1.Name = "button1";
-            button1.Size = new Size(84, 62);
+            button1.Size = new Size(70, 52);
             button1.TabIndex = 0;
             button1.Text = "About";
             button1.UseVisualStyleBackColor = true;
@@ -68,39 +68,41 @@
             contextMenuStrip1.ImageScalingSize = new Size(28, 28);
             contextMenuStrip1.Items.AddRange(new ToolStripItem[] { showWindowToolStripMenuItem, exitToolStripMenuItem });
             contextMenuStrip1.Name = "contextMenuStrip1";
-            contextMenuStrip1.Size = new Size(219, 76);
+            contextMenuStrip1.Size = new Size(200, 68);
             // 
             // showWindowToolStripMenuItem
             // 
             showWindowToolStripMenuItem.Name = "showWindowToolStripMenuItem";
-            showWindowToolStripMenuItem.Size = new Size(218, 36);
+            showWindowToolStripMenuItem.Size = new Size(199, 32);
             showWindowToolStripMenuItem.Text = "Show Window";
             showWindowToolStripMenuItem.Click += showWindowToolStripMenuItem_Click;
             // 
             // exitToolStripMenuItem
             // 
             exitToolStripMenuItem.Name = "exitToolStripMenuItem";
-            exitToolStripMenuItem.Size = new Size(218, 36);
+            exitToolStripMenuItem.Size = new Size(199, 32);
             exitToolStripMenuItem.Text = "Exit";
             exitToolStripMenuItem.Click += ExitToolStripMenuItem_Click;
             // 
             // label2
             // 
             label2.AutoSize = true;
-            label2.Font = new Font("Segoe UI", 7F, FontStyle.Regular, GraphicsUnit.Point);
-            label2.Location = new Point(12, 52);
+            label2.Font = new Font("Segoe UI", 7F);
+            label2.Location = new Point(10, 43);
+            label2.Margin = new Padding(2, 0, 2, 0);
             label2.Name = "label2";
-            label2.Size = new Size(146, 23);
+            label2.Size = new Size(120, 19);
             label2.TabIndex = 3;
             label2.Text = "By Panos Metaxas";
             // 
             // label3
             // 
             label3.AutoSize = true;
-            label3.Font = new Font("Segoe UI", 10F, FontStyle.Regular, GraphicsUnit.Point);
-            label3.Location = new Point(174, 149);
+            label3.Font = new Font("Segoe UI", 10F);
+            label3.Location = new Point(145, 124);
+            label3.Margin = new Padding(2, 0, 2, 0);
             label3.Name = "label3";
-            label3.Size = new Size(246, 32);
+            label3.Size = new Size(204, 28);
             label3.TabIndex = 4;
             label3.Text = "workersoft@gmx.com";
             // 
@@ -109,10 +111,10 @@
             pictureBox1.BackColor = Color.Transparent;
             pictureBox1.ErrorImage = (Image)resources.GetObject("pictureBox1.ErrorImage");
             pictureBox1.Image = (Image)resources.GetObject("pictureBox1.Image");
-            pictureBox1.Location = new Point(14, 12);
-            pictureBox1.Margin = new Padding(3, 4, 3, 4);
+            pictureBox1.Location = new Point(12, 10);
+            pictureBox1.Margin = new Padding(2, 3, 2, 3);
             pictureBox1.Name = "pictureBox1";
-            pictureBox1.Size = new Size(399, 52);
+            pictureBox1.Size = new Size(332, 43);
             pictureBox1.SizeMode = PictureBoxSizeMode.StretchImage;
             pictureBox1.TabIndex = 5;
             pictureBox1.TabStop = false;
@@ -122,28 +124,28 @@
             checkBox1.AutoSize = true;
             checkBox1.Checked = true;
             checkBox1.CheckState = CheckState.Checked;
-            checkBox1.Font = new Font("Segoe UI", 8F, FontStyle.Regular, GraphicsUnit.Point);
-            checkBox1.Location = new Point(198, 72);
-            checkBox1.Margin = new Padding(3, 4, 3, 4);
+            checkBox1.Font = new Font("Segoe UI", 8F);
+            checkBox1.Location = new Point(165, 60);
+            checkBox1.Margin = new Padding(2, 3, 2, 3);
             checkBox1.Name = "checkBox1";
-            checkBox1.Size = new Size(198, 29);
+            checkBox1.Size = new Size(171, 25);
             checkBox1.TabIndex = 6;
             checkBox1.Text = "System is managed";
             checkBox1.UseVisualStyleBackColor = true;
             checkBox1.CheckedChanged += checkBox1_CheckedChanged;
             // 
             // Form1
-            //
-            AutoScaleDimensions = new SizeF(12F, 30F);
+            // 
+            AutoScaleDimensions = new SizeF(10F, 25F);
             AutoScaleMode = AutoScaleMode.Font;
-            ClientSize = new Size(425, 186);
+            ClientSize = new Size(354, 155);
             Controls.Add(label2);
             Controls.Add(checkBox1);
             Controls.Add(pictureBox1);
             Controls.Add(label3);
             Controls.Add(button1);
             Icon = (Icon)resources.GetObject("$this.Icon");
-            Margin = new Padding(5, 6, 5, 6);
+            Margin = new Padding(4, 5, 4, 5);
             Name = "Form1";
             ShowInTaskbar = false;
             Text = "Power-Plan Manager";

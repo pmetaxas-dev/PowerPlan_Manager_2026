@@ -27,3 +27,34 @@ E:\C#\Visual Studio\Power-Plan_Manager-Ready To Publish - Final\App_Packger_proj
 E:\C#\Visual Studio\Power-Plan_Manager-Ready To Publish - Final\App_Packger_proj\obj\Release\MultipleQualifiersPerDimensionFound.txt
 E:\C#\Visual Studio\Power-Plan_Manager-Ready To Publish - Final\App_Packger_proj\obj\Release\ProjectArchitectures.txt
 E:\C#\Visual Studio\Power-Plan_Manager-Ready To Publish - Final\App_Packger_proj\obj\Release\App_Packger_proj.wapproj.LastBuild.txt
+E:\2026_projects!\PowerPlan_Manager_2026\App_Packger_proj\bin\AnyCPU\Release\Power-Plan_Manager-Take_8\Power-Plan_Manager-2.0.exe
+E:\2026_projects!\PowerPlan_Manager_2026\App_Packger_proj\bin\AnyCPU\Release\Power-Plan_Manager-Take_8\Papirus-Team-Papirus-Apps-Preferences-system-login.ico
+E:\2026_projects!\PowerPlan_Manager_2026\App_Packger_proj\bin\AnyCPU\Release\resources.pri
+E:\2026_projects!\PowerPlan_Manager_2026\App_Packger_proj\bin\AnyCPU\Release\AppxManifest.xml
+E:\2026_projects!\PowerPlan_Manager_2026\App_Packger_proj\bin\AnyCPU\Release\Upload\AppxManifest.xml
+E:\2026_projects!\PowerPlan_Manager_2026\App_Packger_proj\bin\AnyCPU\Release\App_Packger_proj.build.appxrecipe
+E:\2026_projects!\PowerPlan_Manager_2026\App_Packger_proj\bin\AnyCPU\Release\Upload\App_Packger_proj.build.appxrecipe
+E:\2026_projects!\PowerPlan_Manager_2026\App_Packger_proj\obj\Release\App_Packger_proj.wapproj.CoreCompileInputs.cache
+E:\2026_projects!\PowerPlan_Manager_2026\App_Packger_proj\obj\Release\priconfig.xml
+E:\2026_projects!\PowerPlan_Manager_2026\App_Packger_proj\obj\Release\priconfig.xml.intermediate
+E:\2026_projects!\PowerPlan_Manager_2026\App_Packger_proj\obj\Release\unfiltered.layout.resfiles
+E:\2026_projects!\PowerPlan_Manager_2026\App_Packger_proj\obj\Release\unfiltered.layout.resfiles.intermediate
+E:\2026_projects!\PowerPlan_Manager_2026\App_Packger_proj\obj\Release\filtered.layout.resfiles
+E:\2026_projects!\PowerPlan_Manager_2026\App_Packger_proj\obj\Release\filtered.layout.resfiles.intermediate
+E:\2026_projects!\PowerPlan_Manager_2026\App_Packger_proj\obj\Release\excluded.layout.resfiles
+E:\2026_projects!\PowerPlan_Manager_2026\App_Packger_proj\obj\Release\excluded.layout.resfiles.intermediate
+E:\2026_projects!\PowerPlan_Manager_2026\App_Packger_proj\obj\Release\resources.resfiles
+E:\2026_projects!\PowerPlan_Manager_2026\App_Packger_proj\obj\Release\resources.resfiles.intermediate
+E:\2026_projects!\PowerPlan_Manager_2026\App_Packger_proj\obj\Release\pri.resfiles
+E:\2026_projects!\PowerPlan_Manager_2026\App_Packger_proj\obj\Release\pri.resfiles.intermediate
+E:\2026_projects!\PowerPlan_Manager_2026\App_Packger_proj\obj\Release\qualifiers.txt
+E:\2026_projects!\PowerPlan_Manager_2026\App_Packger_proj\obj\Release\qualifiers.txt.intermediate
+E:\2026_projects!\PowerPlan_Manager_2026\App_Packger_proj\obj\Release\MultipleQualifiersPerDimensionFound.txt
+E:\2026_projects!\PowerPlan_Manager_2026\App_Packger_proj\obj\Release\ProjectArchitectures.txt
+E:\2026_projects!\PowerPlan_Manager_2026\App_Packger_proj\obj\Release\App_Packger_proj.wapproj.LastBuild.txt
+E:\2026_projects!\PowerPlan_Manager_2026\App_Packger_proj\bin\AnyCPU\Release\Power-Plan_Manager-Take_8\Power-Plan_Manager-2.0.deps.json
+E:\2026_projects!\PowerPlan_Manager_2026\App_Packger_proj\bin\AnyCPU\Release\Power-Plan_Manager-Take_8\Power-Plan_Manager-2.0.runtimeconfig.json
+E:\2026_projects!\PowerPlan_Manager_2026\App_Packger_proj\bin\AnyCPU\Release\Power-Plan_Manager-Take_8\Power-Plan_Manager-2.0.dll
+E:\2026_projects!\PowerPlan_Manager_2026\App_Packger_proj\bin\AnyCPU\Release\Power-Plan_Manager-Take_8\Power-Plan_Manager-2.0.dll.config
+E:\2026_projects!\PowerPlan_Manager_2026\App_Packger_proj\bin\AnyCPU\Release\Power-Plan_Manager-Take_8\Power-Plan_Manager-2.0.pdb
+E:\2026_projects!\PowerPlan_Manager_2026\App_Packger_proj\obj\Release\App_Packger_proj.wapproj.AssemblyReference.cache

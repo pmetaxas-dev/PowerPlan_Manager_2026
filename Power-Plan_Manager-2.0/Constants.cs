@@ -36,6 +36,8 @@ namespace Power_Plan_Manager_Take_8
                 ValidateGuid(UltimatePerformance, nameof(UltimatePerformance));
                 ValidateGuid(EnergySaver, nameof(EnergySaver));
                 ValidateGuid(RyzenUniversal, nameof(RyzenUniversal));
+                // Additional known 1usmus Ryzen power plan GUID (some users may have this variant)
+                ValidateGuid(RyzenPowerPlan, nameof(RyzenPowerPlan));
                 Logger.Log("All power plan GUIDs validated successfully");
             }
             catch (Exception ex)
@@ -64,6 +66,12 @@ namespace Power_Plan_Manager_Take_8
         /// Power plan GUID for 1usmus Ryzen Universal profile.
         /// </summary>
         public const string RyzenUniversal = "fcaac3f2-997a-4fdb-8e30-c4fb6df29398";
+
+        /// <summary>
+        /// Additional known 1usmus Ryzen power plan GUID found on some systems.
+        /// Treated as an acceptable high-performance plan for AMD machines.
+        /// </summary>
+        public const string RyzenPowerPlan = "d8ba2c0c-8978-4d80-b094-71dd1850c424";
     }
 }
 

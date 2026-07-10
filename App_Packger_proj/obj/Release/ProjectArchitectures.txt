@@ -1,1 +1,1 @@
-E:\C#\Visual Studio\Power-Plan_Manager-Ready To Publish - Final\App_Packger_proj\App_Packger_proj.wapproj;neutral
+E:\2026_projects!\PowerPlan_Manager_2026\App_Packger_proj\App_Packger_proj.wapproj;neutral

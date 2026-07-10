@@ -45,15 +45,21 @@ namespace Power_Plan_Manager_Take_8
 
         /// <summary>
         /// Gets the best available high-performance power plan:
-        /// Returns Ryzen Universal if available, otherwise Ultimate Performance.
+        /// Returns Ryzen Universal (or another known Ryzen plan) if available, otherwise Ultimate Performance.
         /// </summary>
         /// <returns>The GUID of the selected power plan.</returns>
         public static string GetOptimalHighPerformancePlan()
         {
-            // Check if Ryzen Universal is available
+            // Preferred: 1usmus Ryzen Universal
             if (IsPowerPlanAvailable(Constants.RyzenUniversal))
             {
                 return Constants.RyzenUniversal;
+            }
+
+            // Alternate Ryzen variant seen on some systems
+            if (IsPowerPlanAvailable(Constants.RyzenPowerPlan))
+            {
+                return Constants.RyzenPowerPlan;
             }
 
             // Fall back to Ultimate Performance

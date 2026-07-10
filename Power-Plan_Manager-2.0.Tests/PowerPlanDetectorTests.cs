@@ -31,11 +31,12 @@ namespace Power_Plan_Manager_Take_8.Tests
             string result = PowerPlanDetector.GetOptimalHighPerformancePlan();
 
             // Assert
-            bool isRyzen = result.Equals(Constants.RyzenUniversal, StringComparison.OrdinalIgnoreCase);
+            bool isRyzenUniversal = result.Equals(Constants.RyzenUniversal, StringComparison.OrdinalIgnoreCase);
+            bool isRyzenAlt = result.Equals(Constants.RyzenPowerPlan, StringComparison.OrdinalIgnoreCase);
             bool isUltimate = result.Equals(Constants.UltimatePerformance, StringComparison.OrdinalIgnoreCase);
 
-            Assert.IsTrue(isRyzen || isUltimate,
-                "GetOptimalHighPerformancePlan should return either RyzenUniversal or UltimatePerformance");
+            Assert.IsTrue(isRyzenUniversal || isRyzenAlt || isUltimate,
+                "GetOptimalHighPerformancePlan should return either a known Ryzen GUID or UltimatePerformance");
         }
 
         [TestMethod]
@@ -71,6 +72,7 @@ namespace Power_Plan_Manager_Take_8.Tests
             Assert.IsTrue(Guid.TryParse(Constants.UltimatePerformance, out _));
             Assert.IsTrue(Guid.TryParse(Constants.EnergySaver, out _));
             Assert.IsTrue(Guid.TryParse(Constants.RyzenUniversal, out _));
+            Assert.IsTrue(Guid.TryParse(Constants.RyzenPowerPlan, out _));
         }
 
         [TestMethod]
@@ -81,6 +83,7 @@ namespace Power_Plan_Manager_Take_8.Tests
             Assert.IsFalse(string.IsNullOrWhiteSpace(Constants.UltimatePerformance));
             Assert.IsFalse(string.IsNullOrWhiteSpace(Constants.EnergySaver));
             Assert.IsFalse(string.IsNullOrWhiteSpace(Constants.RyzenUniversal));
+            Assert.IsFalse(string.IsNullOrWhiteSpace(Constants.RyzenPowerPlan));
         }
 
         [TestMethod]
@@ -92,7 +95,8 @@ namespace Power_Plan_Manager_Take_8.Tests
                 Constants.HighPerformance, 
                 Constants.UltimatePerformance, 
                 Constants.EnergySaver, 
-                Constants.RyzenUniversal 
+                Constants.RyzenUniversal,
+                Constants.RyzenPowerPlan
             };
 
             // Assert

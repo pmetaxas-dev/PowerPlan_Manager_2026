@@ -8,70 +8,246 @@
     <TargetOsDescription>Windows 10.0</TargetOsDescription>
     <SolutionConfiguration>Release|AnyCPU</SolutionConfiguration>
     <PackageArchitecture>neutral</PackageArchitecture>
-    <PackageIdentityName>166966f1-a499-42cd-8d61-a8c5315ea30b</PackageIdentityName>
-    <PackageIdentityPublisher>CN=Sentinel</PackageIdentityPublisher>
-    <IntermediateOutputPath>E:\C#\Visual Studio\Power-Plan_Manager-Ready To Publish - Final\App_Packger_proj\obj\Release\</IntermediateOutputPath>
+    <PackageIdentityName>20761PanosMetaxas.AutomaticPower</PackageIdentityName>
+    <PackageIdentityPublisher>CN=6A7A0139-AA17-400B-B6CF-A1B3D2DFEB3C</PackageIdentityPublisher>
+    <IntermediateOutputPath>E:\2026_projects!\PowerPlan_Manager_2026\App_Packger_proj\obj\Release\</IntermediateOutputPath>
     <RemoteDeploymentType></RemoteDeploymentType>
     <PackageRegistrationPath></PackageRegistrationPath>
     <RemoveNonLayoutFiles>true</RemoveNonLayoutFiles>
     <DeployOptionalPackages>false</DeployOptionalPackages>
     <WindowsSdkPath></WindowsSdkPath>
-    <LayoutDir>E:\C#\Visual Studio\Power-Plan_Manager-Ready To Publish - Final\App_Packger_proj\bin\AnyCPU\Release\AppX</LayoutDir>
+    <LayoutDir>E:\2026_projects!\PowerPlan_Manager_2026\App_Packger_proj\bin\AnyCPU\Release\AppX</LayoutDir>
   </PropertyGroup>
   <ItemGroup>
-    <AppXManifest Include="E:\C#\Visual Studio\Power-Plan_Manager-Ready To Publish - Final\App_Packger_proj\bin\AnyCPU\Release\AppxManifest.xml">
+    <AppXManifest Include="E:\2026_projects!\PowerPlan_Manager_2026\App_Packger_proj\bin\AnyCPU\Release\AppxManifest.xml">
       <PackagePath>AppxManifest.xml</PackagePath>
       <ReRegisterAppIfChanged>true</ReRegisterAppIfChanged>
     </AppXManifest>
   </ItemGroup>
   <ItemGroup>
-    <AppxPackagedFile Include="E:\C#\Visual Studio\Power-Plan_Manager-Ready To Publish - Final\App_Packger_proj\Images\SplashScreen.scale-200.png">
+    <AppxPackagedFile Include="E:\2026_projects!\PowerPlan_Manager_2026\App_Packger_proj\Images\LargeTile.scale-100.png">
+      <PackagePath>Images\LargeTile.scale-100.png</PackagePath>
+      <ReRegisterAppIfChanged>true</ReRegisterAppIfChanged>
+    </AppxPackagedFile>
+    <AppxPackagedFile Include="E:\2026_projects!\PowerPlan_Manager_2026\App_Packger_proj\Images\LargeTile.scale-125.png">
+      <PackagePath>Images\LargeTile.scale-125.png</PackagePath>
+      <ReRegisterAppIfChanged>true</ReRegisterAppIfChanged>
+    </AppxPackagedFile>
+    <AppxPackagedFile Include="E:\2026_projects!\PowerPlan_Manager_2026\App_Packger_proj\Images\LargeTile.scale-150.png">
+      <PackagePath>Images\LargeTile.scale-150.png</PackagePath>
+      <ReRegisterAppIfChanged>true</ReRegisterAppIfChanged>
+    </AppxPackagedFile>
+    <AppxPackagedFile Include="E:\2026_projects!\PowerPlan_Manager_2026\App_Packger_proj\Images\LargeTile.scale-200.png">
+      <PackagePath>Images\LargeTile.scale-200.png</PackagePath>
+      <ReRegisterAppIfChanged>true</ReRegisterAppIfChanged>
+    </AppxPackagedFile>
+    <AppxPackagedFile Include="E:\2026_projects!\PowerPlan_Manager_2026\App_Packger_proj\Images\LargeTile.scale-400.png">
+      <PackagePath>Images\LargeTile.scale-400.png</PackagePath>
+      <ReRegisterAppIfChanged>true</ReRegisterAppIfChanged>
+    </AppxPackagedFile>
+    <AppxPackagedFile Include="E:\2026_projects!\PowerPlan_Manager_2026\App_Packger_proj\Images\SmallTile.scale-100.png">
+      <PackagePath>Images\SmallTile.scale-100.png</PackagePath>
+      <ReRegisterAppIfChanged>true</ReRegisterAppIfChanged>
+    </AppxPackagedFile>
+    <AppxPackagedFile Include="E:\2026_projects!\PowerPlan_Manager_2026\App_Packger_proj\Images\SmallTile.scale-125.png">
+      <PackagePath>Images\SmallTile.scale-125.png</PackagePath>
+      <ReRegisterAppIfChanged>true</ReRegisterAppIfChanged>
+    </AppxPackagedFile>
+    <AppxPackagedFile Include="E:\2026_projects!\PowerPlan_Manager_2026\App_Packger_proj\Images\SmallTile.scale-150.png">
+      <PackagePath>Images\SmallTile.scale-150.png</PackagePath>
+      <ReRegisterAppIfChanged>true</ReRegisterAppIfChanged>
+    </AppxPackagedFile>
+    <AppxPackagedFile Include="E:\2026_projects!\PowerPlan_Manager_2026\App_Packger_proj\Images\SmallTile.scale-200.png">
+      <PackagePath>Images\SmallTile.scale-200.png</PackagePath>
+      <ReRegisterAppIfChanged>true</ReRegisterAppIfChanged>
+    </AppxPackagedFile>
+    <AppxPackagedFile Include="E:\2026_projects!\PowerPlan_Manager_2026\App_Packger_proj\Images\SmallTile.scale-400.png">
+      <PackagePath>Images\SmallTile.scale-400.png</PackagePath>
+      <ReRegisterAppIfChanged>true</ReRegisterAppIfChanged>
+    </AppxPackagedFile>
+    <AppxPackagedFile Include="E:\2026_projects!\PowerPlan_Manager_2026\App_Packger_proj\Images\SplashScreen.scale-100.png">
+      <PackagePath>Images\SplashScreen.scale-100.png</PackagePath>
+      <ReRegisterAppIfChanged>true</ReRegisterAppIfChanged>
+    </AppxPackagedFile>
+    <AppxPackagedFile Include="E:\2026_projects!\PowerPlan_Manager_2026\App_Packger_proj\Images\SplashScreen.scale-125.png">
+      <PackagePath>Images\SplashScreen.scale-125.png</PackagePath>
+      <ReRegisterAppIfChanged>true</ReRegisterAppIfChanged>
+    </AppxPackagedFile>
+    <AppxPackagedFile Include="E:\2026_projects!\PowerPlan_Manager_2026\App_Packger_proj\Images\SplashScreen.scale-150.png">
+      <PackagePath>Images\SplashScreen.scale-150.png</PackagePath>
+      <ReRegisterAppIfChanged>true</ReRegisterAppIfChanged>
+    </AppxPackagedFile>
+    <AppxPackagedFile Include="E:\2026_projects!\PowerPlan_Manager_2026\App_Packger_proj\Images\SplashScreen.scale-200.png">
       <PackagePath>Images\SplashScreen.scale-200.png</PackagePath>
       <ReRegisterAppIfChanged>true</ReRegisterAppIfChanged>
     </AppxPackagedFile>
-    <AppxPackagedFile Include="E:\C#\Visual Studio\Power-Plan_Manager-Ready To Publish - Final\App_Packger_proj\Images\LockScreenLogo.scale-200.png">
+    <AppxPackagedFile Include="E:\2026_projects!\PowerPlan_Manager_2026\App_Packger_proj\Images\LockScreenLogo.scale-200.png">
       <PackagePath>Images\LockScreenLogo.scale-200.png</PackagePath>
     </AppxPackagedFile>
-    <AppxPackagedFile Include="E:\C#\Visual Studio\Power-Plan_Manager-Ready To Publish - Final\App_Packger_proj\Images\Square150x150Logo.scale-200.png">
+    <AppxPackagedFile Include="E:\2026_projects!\PowerPlan_Manager_2026\App_Packger_proj\Images\SplashScreen.scale-400.png">
+      <PackagePath>Images\SplashScreen.scale-400.png</PackagePath>
+      <ReRegisterAppIfChanged>true</ReRegisterAppIfChanged>
+    </AppxPackagedFile>
+    <AppxPackagedFile Include="E:\2026_projects!\PowerPlan_Manager_2026\App_Packger_proj\Images\Square150x150Logo.scale-100.png">
+      <PackagePath>Images\Square150x150Logo.scale-100.png</PackagePath>
+      <ReRegisterAppIfChanged>true</ReRegisterAppIfChanged>
+    </AppxPackagedFile>
+    <AppxPackagedFile Include="E:\2026_projects!\PowerPlan_Manager_2026\App_Packger_proj\Images\Square150x150Logo.scale-125.png">
+      <PackagePath>Images\Square150x150Logo.scale-125.png</PackagePath>
+      <ReRegisterAppIfChanged>true</ReRegisterAppIfChanged>
+    </AppxPackagedFile>
+    <AppxPackagedFile Include="E:\2026_projects!\PowerPlan_Manager_2026\App_Packger_proj\Images\Square150x150Logo.scale-150.png">
+      <PackagePath>Images\Square150x150Logo.scale-150.png</PackagePath>
+      <ReRegisterAppIfChanged>true</ReRegisterAppIfChanged>
+    </AppxPackagedFile>
+    <AppxPackagedFile Include="E:\2026_projects!\PowerPlan_Manager_2026\App_Packger_proj\Images\Square150x150Logo.scale-200.png">
       <PackagePath>Images\Square150x150Logo.scale-200.png</PackagePath>
       <ReRegisterAppIfChanged>true</ReRegisterAppIfChanged>
     </AppxPackagedFile>
-    <AppxPackagedFile Include="E:\C#\Visual Studio\Power-Plan_Manager-Ready To Publish - Final\App_Packger_proj\Images\Square44x44Logo.scale-200.png">
+    <AppxPackagedFile Include="E:\2026_projects!\PowerPlan_Manager_2026\App_Packger_proj\Images\Square150x150Logo.scale-400.png">
+      <PackagePath>Images\Square150x150Logo.scale-400.png</PackagePath>
+      <ReRegisterAppIfChanged>true</ReRegisterAppIfChanged>
+    </AppxPackagedFile>
+    <AppxPackagedFile Include="E:\2026_projects!\PowerPlan_Manager_2026\App_Packger_proj\Images\Square44x44Logo.altform-lightunplated_targetsize-16.png">
+      <PackagePath>Images\Square44x44Logo.altform-lightunplated_targetsize-16.png</PackagePath>
+      <ReRegisterAppIfChanged>true</ReRegisterAppIfChanged>
+    </AppxPackagedFile>
+    <AppxPackagedFile Include="E:\2026_projects!\PowerPlan_Manager_2026\App_Packger_proj\Images\Square44x44Logo.altform-lightunplated_targetsize-24.png">
+      <PackagePath>Images\Square44x44Logo.altform-lightunplated_targetsize-24.png</PackagePath>
+      <ReRegisterAppIfChanged>true</ReRegisterAppIfChanged>
+    </AppxPackagedFile>
+    <AppxPackagedFile Include="E:\2026_projects!\PowerPlan_Manager_2026\App_Packger_proj\Images\Square44x44Logo.altform-lightunplated_targetsize-256.png">
+      <PackagePath>Images\Square44x44Logo.altform-lightunplated_targetsize-256.png</PackagePath>
+      <ReRegisterAppIfChanged>true</ReRegisterAppIfChanged>
+    </AppxPackagedFile>
+    <AppxPackagedFile Include="E:\2026_projects!\PowerPlan_Manager_2026\App_Packger_proj\Images\Square44x44Logo.altform-lightunplated_targetsize-32.png">
+      <PackagePath>Images\Square44x44Logo.altform-lightunplated_targetsize-32.png</PackagePath>
+      <ReRegisterAppIfChanged>true</ReRegisterAppIfChanged>
+    </AppxPackagedFile>
+    <AppxPackagedFile Include="E:\2026_projects!\PowerPlan_Manager_2026\App_Packger_proj\Images\Square44x44Logo.altform-lightunplated_targetsize-48.png">
+      <PackagePath>Images\Square44x44Logo.altform-lightunplated_targetsize-48.png</PackagePath>
+      <ReRegisterAppIfChanged>true</ReRegisterAppIfChanged>
+    </AppxPackagedFile>
+    <AppxPackagedFile Include="E:\2026_projects!\PowerPlan_Manager_2026\App_Packger_proj\Images\Square44x44Logo.altform-unplated_targetsize-16.png">
+      <PackagePath>Images\Square44x44Logo.altform-unplated_targetsize-16.png</PackagePath>
+      <ReRegisterAppIfChanged>true</ReRegisterAppIfChanged>
+    </AppxPackagedFile>
+    <AppxPackagedFile Include="E:\2026_projects!\PowerPlan_Manager_2026\App_Packger_proj\Images\Square44x44Logo.altform-unplated_targetsize-256.png">
+      <PackagePath>Images\Square44x44Logo.altform-unplated_targetsize-256.png</PackagePath>
+      <ReRegisterAppIfChanged>true</ReRegisterAppIfChanged>
+    </AppxPackagedFile>
+    <AppxPackagedFile Include="E:\2026_projects!\PowerPlan_Manager_2026\App_Packger_proj\Images\Square44x44Logo.altform-unplated_targetsize-32.png">
+      <PackagePath>Images\Square44x44Logo.altform-unplated_targetsize-32.png</PackagePath>
+      <ReRegisterAppIfChanged>true</ReRegisterAppIfChanged>
+    </AppxPackagedFile>
+    <AppxPackagedFile Include="E:\2026_projects!\PowerPlan_Manager_2026\App_Packger_proj\Images\Square44x44Logo.altform-unplated_targetsize-48.png">
+      <PackagePath>Images\Square44x44Logo.altform-unplated_targetsize-48.png</PackagePath>
+      <ReRegisterAppIfChanged>true</ReRegisterAppIfChanged>
+    </AppxPackagedFile>
+    <AppxPackagedFile Include="E:\2026_projects!\PowerPlan_Manager_2026\App_Packger_proj\Images\Square44x44Logo.scale-100.png">
+      <PackagePath>Images\Square44x44Logo.scale-100.png</PackagePath>
+      <ReRegisterAppIfChanged>true</ReRegisterAppIfChanged>
+    </AppxPackagedFile>
+    <AppxPackagedFile Include="E:\2026_projects!\PowerPlan_Manager_2026\App_Packger_proj\Images\Square44x44Logo.scale-125.png">
+      <PackagePath>Images\Square44x44Logo.scale-125.png</PackagePath>
+      <ReRegisterAppIfChanged>true</ReRegisterAppIfChanged>
+    </AppxPackagedFile>
+    <AppxPackagedFile Include="E:\2026_projects!\PowerPlan_Manager_2026\App_Packger_proj\Images\Square44x44Logo.scale-150.png">
+      <PackagePath>Images\Square44x44Logo.scale-150.png</PackagePath>
+      <ReRegisterAppIfChanged>true</ReRegisterAppIfChanged>
+    </AppxPackagedFile>
+    <AppxPackagedFile Include="E:\2026_projects!\PowerPlan_Manager_2026\App_Packger_proj\Images\Square44x44Logo.scale-200.png">
       <PackagePath>Images\Square44x44Logo.scale-200.png</PackagePath>
       <ReRegisterAppIfChanged>true</ReRegisterAppIfChanged>
     </AppxPackagedFile>
-    <AppxPackagedFile Include="E:\C#\Visual Studio\Power-Plan_Manager-Ready To Publish - Final\App_Packger_proj\Images\Square44x44Logo.targetsize-24_altform-unplated.png">
+    <AppxPackagedFile Include="E:\2026_projects!\PowerPlan_Manager_2026\App_Packger_proj\Images\Square44x44Logo.scale-400.png">
+      <PackagePath>Images\Square44x44Logo.scale-400.png</PackagePath>
+      <ReRegisterAppIfChanged>true</ReRegisterAppIfChanged>
+    </AppxPackagedFile>
+    <AppxPackagedFile Include="E:\2026_projects!\PowerPlan_Manager_2026\App_Packger_proj\Images\Square44x44Logo.targetsize-16.png">
+      <PackagePath>Images\Square44x44Logo.targetsize-16.png</PackagePath>
+      <ReRegisterAppIfChanged>true</ReRegisterAppIfChanged>
+    </AppxPackagedFile>
+    <AppxPackagedFile Include="E:\2026_projects!\PowerPlan_Manager_2026\App_Packger_proj\Images\Square44x44Logo.targetsize-24.png">
+      <PackagePath>Images\Square44x44Logo.targetsize-24.png</PackagePath>
+      <ReRegisterAppIfChanged>true</ReRegisterAppIfChanged>
+    </AppxPackagedFile>
+    <AppxPackagedFile Include="E:\2026_projects!\PowerPlan_Manager_2026\App_Packger_proj\Images\Square44x44Logo.targetsize-24_altform-unplated.png">
       <PackagePath>Images\Square44x44Logo.targetsize-24_altform-unplated.png</PackagePath>
       <ReRegisterAppIfChanged>true</ReRegisterAppIfChanged>
     </AppxPackagedFile>
-    <AppxPackagedFile Include="E:\C#\Visual Studio\Power-Plan_Manager-Ready To Publish - Final\App_Packger_proj\Images\StoreLogo.png">
-      <PackagePath>Images\StoreLogo.png</PackagePath>
+    <AppxPackagedFile Include="E:\2026_projects!\PowerPlan_Manager_2026\App_Packger_proj\Images\Square44x44Logo.targetsize-256.png">
+      <PackagePath>Images\Square44x44Logo.targetsize-256.png</PackagePath>
       <ReRegisterAppIfChanged>true</ReRegisterAppIfChanged>
     </AppxPackagedFile>
-    <AppxPackagedFile Include="E:\C#\Visual Studio\Power-Plan_Manager-Ready To Publish - Final\App_Packger_proj\Images\Wide310x150Logo.scale-200.png">
+    <AppxPackagedFile Include="E:\2026_projects!\PowerPlan_Manager_2026\App_Packger_proj\Images\Square44x44Logo.targetsize-32.png">
+      <PackagePath>Images\Square44x44Logo.targetsize-32.png</PackagePath>
+      <ReRegisterAppIfChanged>true</ReRegisterAppIfChanged>
+    </AppxPackagedFile>
+    <AppxPackagedFile Include="E:\2026_projects!\PowerPlan_Manager_2026\App_Packger_proj\Images\Square44x44Logo.targetsize-48.png">
+      <PackagePath>Images\Square44x44Logo.targetsize-48.png</PackagePath>
+      <ReRegisterAppIfChanged>true</ReRegisterAppIfChanged>
+    </AppxPackagedFile>
+    <AppxPackagedFile Include="E:\2026_projects!\PowerPlan_Manager_2026\App_Packger_proj\Images\StoreLogo.scale-100.png">
+      <PackagePath>Images\StoreLogo.scale-100.png</PackagePath>
+      <ReRegisterAppIfChanged>true</ReRegisterAppIfChanged>
+    </AppxPackagedFile>
+    <AppxPackagedFile Include="E:\2026_projects!\PowerPlan_Manager_2026\App_Packger_proj\Images\StoreLogo.scale-125.png">
+      <PackagePath>Images\StoreLogo.scale-125.png</PackagePath>
+      <ReRegisterAppIfChanged>true</ReRegisterAppIfChanged>
+    </AppxPackagedFile>
+    <AppxPackagedFile Include="E:\2026_projects!\PowerPlan_Manager_2026\App_Packger_proj\Images\StoreLogo.scale-150.png">
+      <PackagePath>Images\StoreLogo.scale-150.png</PackagePath>
+      <ReRegisterAppIfChanged>true</ReRegisterAppIfChanged>
+    </AppxPackagedFile>
+    <AppxPackagedFile Include="E:\2026_projects!\PowerPlan_Manager_2026\App_Packger_proj\Images\StoreLogo.scale-200.png">
+      <PackagePath>Images\StoreLogo.scale-200.png</PackagePath>
+      <ReRegisterAppIfChanged>true</ReRegisterAppIfChanged>
+    </AppxPackagedFile>
+    <AppxPackagedFile Include="E:\2026_projects!\PowerPlan_Manager_2026\App_Packger_proj\Images\StoreLogo.scale-400.png">
+      <PackagePath>Images\StoreLogo.scale-400.png</PackagePath>
+      <ReRegisterAppIfChanged>true</ReRegisterAppIfChanged>
+    </AppxPackagedFile>
+    <AppxPackagedFile Include="E:\2026_projects!\PowerPlan_Manager_2026\App_Packger_proj\Images\Wide310x150Logo.scale-100.png">
+      <PackagePath>Images\Wide310x150Logo.scale-100.png</PackagePath>
+      <ReRegisterAppIfChanged>true</ReRegisterAppIfChanged>
+    </AppxPackagedFile>
+    <AppxPackagedFile Include="E:\2026_projects!\PowerPlan_Manager_2026\App_Packger_proj\Images\Wide310x150Logo.scale-125.png">
+      <PackagePath>Images\Wide310x150Logo.scale-125.png</PackagePath>
+      <ReRegisterAppIfChanged>true</ReRegisterAppIfChanged>
+    </AppxPackagedFile>
+    <AppxPackagedFile Include="E:\2026_projects!\PowerPlan_Manager_2026\App_Packger_proj\Images\Wide310x150Logo.scale-150.png">
+      <PackagePath>Images\Wide310x150Logo.scale-150.png</PackagePath>
+      <ReRegisterAppIfChanged>true</ReRegisterAppIfChanged>
+    </AppxPackagedFile>
+    <AppxPackagedFile Include="E:\2026_projects!\PowerPlan_Manager_2026\App_Packger_proj\Images\Wide310x150Logo.scale-200.png">
       <PackagePath>Images\Wide310x150Logo.scale-200.png</PackagePath>
       <ReRegisterAppIfChanged>true</ReRegisterAppIfChanged>
     </AppxPackagedFile>
-    <AppxPackagedFile Include="E:\C#\Visual Studio\Power-Plan_Manager-Ready To Publish - Final\App_Packger_proj\bin\AnyCPU\Release\resources.pri">
+    <AppxPackagedFile Include="E:\2026_projects!\PowerPlan_Manager_2026\App_Packger_proj\Images\Wide310x150Logo.scale-400.png">
+      <PackagePath>Images\Wide310x150Logo.scale-400.png</PackagePath>
+      <ReRegisterAppIfChanged>true</ReRegisterAppIfChanged>
+    </AppxPackagedFile>
+    <AppxPackagedFile Include="E:\2026_projects!\PowerPlan_Manager_2026\App_Packger_proj\bin\AnyCPU\Release\resources.pri">
       <PackagePath>resources.pri</PackagePath>
     </AppxPackagedFile>
-    <AppxPackagedFile Include="E:\C#\Visual Studio\Power-Plan_Manager-Ready To Publish - Final\Power-Plan_Manager-Take_8\bin\Release\net6.0-windows\Power-Plan_Manager-Take_8.deps.json">
-      <PackagePath>Power-Plan_Manager-Take_8\Power-Plan_Manager-Take_8.deps.json</PackagePath>
+    <AppxPackagedFile Include="E:\2026_projects!\PowerPlan_Manager_2026\Power-Plan_Manager-2.0\bin\Release\net8.0-windows7.0\Power-Plan_Manager-2.0.deps.json">
+      <PackagePath>Power-Plan_Manager-Take_8\Power-Plan_Manager-2.0.deps.json</PackagePath>
     </AppxPackagedFile>
-    <AppxPackagedFile Include="E:\C#\Visual Studio\Power-Plan_Manager-Ready To Publish - Final\Power-Plan_Manager-Take_8\obj\Release\net6.0-windows\apphost.exe">
-      <PackagePath>Power-Plan_Manager-Take_8\Power-Plan_Manager-Take_8.exe</PackagePath>
+    <AppxPackagedFile Include="E:\2026_projects!\PowerPlan_Manager_2026\Power-Plan_Manager-2.0\obj\Release\net8.0-windows7.0\apphost.exe">
+      <PackagePath>Power-Plan_Manager-Take_8\Power-Plan_Manager-2.0.exe</PackagePath>
     </AppxPackagedFile>
-    <AppxPackagedFile Include="E:\C#\Visual Studio\Power-Plan_Manager-Ready To Publish - Final\Power-Plan_Manager-Take_8\Papirus-Team-Papirus-Apps-Preferences-system-login.ico">
+    <AppxPackagedFile Include="E:\2026_projects!\PowerPlan_Manager_2026\Power-Plan_Manager-2.0\Papirus-Team-Papirus-Apps-Preferences-system-login.ico">
       <PackagePath>Power-Plan_Manager-Take_8\Papirus-Team-Papirus-Apps-Preferences-system-login.ico</PackagePath>
     </AppxPackagedFile>
-    <AppxPackagedFile Include="E:\C#\Visual Studio\Power-Plan_Manager-Ready To Publish - Final\Power-Plan_Manager-Take_8\bin\Release\net6.0-windows\Power-Plan_Manager-Take_8.runtimeconfig.json">
-      <PackagePath>Power-Plan_Manager-Take_8\Power-Plan_Manager-Take_8.runtimeconfig.json</PackagePath>
+    <AppxPackagedFile Include="E:\2026_projects!\PowerPlan_Manager_2026\Power-Plan_Manager-2.0\bin\Release\net8.0-windows7.0\Power-Plan_Manager-2.0.runtimeconfig.json">
+      <PackagePath>Power-Plan_Manager-Take_8\Power-Plan_Manager-2.0.runtimeconfig.json</PackagePath>
     </AppxPackagedFile>
-    <AppxPackagedFile Include="E:\C#\Visual Studio\Power-Plan_Manager-Ready To Publish - Final\Power-Plan_Manager-Take_8\bin\Release\net6.0-windows\Power-Plan_Manager-Take_8.dll">
-      <PackagePath>Power-Plan_Manager-Take_8\Power-Plan_Manager-Take_8.dll</PackagePath>
+    <AppxPackagedFile Include="E:\2026_projects!\PowerPlan_Manager_2026\Power-Plan_Manager-2.0\bin\Release\net8.0-windows7.0\Power-Plan_Manager-2.0.dll">
+      <PackagePath>Power-Plan_Manager-Take_8\Power-Plan_Manager-2.0.dll</PackagePath>
     </AppxPackagedFile>
-    <AppxPackagedFile Include="E:\C#\Visual Studio\Power-Plan_Manager-Ready To Publish - Final\Power-Plan_Manager-Take_8\bin\Release\net6.0-windows\Power-Plan_Manager-Take_8.dll.config">
-      <PackagePath>Power-Plan_Manager-Take_8\Power-Plan_Manager-Take_8.dll.config</PackagePath>
+    <AppxPackagedFile Include="E:\2026_projects!\PowerPlan_Manager_2026\Power-Plan_Manager-2.0\bin\Release\net8.0-windows7.0\Power-Plan_Manager-2.0.dll.config">
+      <PackagePath>Power-Plan_Manager-Take_8\Power-Plan_Manager-2.0.dll.config</PackagePath>
     </AppxPackagedFile>
   </ItemGroup>
   <ItemGroup>
