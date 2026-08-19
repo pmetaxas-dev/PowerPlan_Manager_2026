@@ -76,7 +76,7 @@ namespace Power_Plan_Manager_Take_8.Tests
         public void Constants_HighPerformance_MatchesKnownGuid()
         {
             // Assert - High Performance GUID is a Windows standard
-            Assert.AreEqual("8c5e7fda-e8bf-4a96-9a85-a6e23a8c635c", Constants.HighPerformance,
+            Assert.AreEqual(Guid.Parse("8c5e7fda-e8bf-4a96-9a85-a6e23a8c635c"), Guid.Parse(Constants.HighPerformance),
                 "HighPerformance GUID should match the Windows standard GUID");
         }
 
@@ -84,7 +84,7 @@ namespace Power_Plan_Manager_Take_8.Tests
         public void Constants_UltimatePerformance_MatchesKnownGuid()
         {
             // Assert - Ultimate Performance GUID is a Windows standard (Windows 10+)
-            Assert.AreEqual("e9a42b02-d5df-448d-aa00-03f14749e6c0", Constants.UltimatePerformance,
+            Assert.AreEqual(Guid.Parse("e9a42b02-d5df-448d-aa00-03f14749e6c0"), Guid.Parse(Constants.UltimatePerformance),
                 "UltimatePerformance GUID should match the Windows standard GUID");
         }
 
@@ -92,7 +92,7 @@ namespace Power_Plan_Manager_Take_8.Tests
         public void Constants_EnergySaver_MatchesKnownGuid()
         {
             // Assert - Energy Saver GUID is a Windows standard
-            Assert.AreEqual("a1841308-3541-4fab-bc81-f71556f20b4a", Constants.EnergySaver,
+            Assert.AreEqual(Guid.Parse("a1841308-3541-4fab-bc81-f71556f20b4a"), Guid.Parse(Constants.EnergySaver),
                 "EnergySaver GUID should match the Windows standard GUID");
         }
 
@@ -100,7 +100,7 @@ namespace Power_Plan_Manager_Take_8.Tests
         public void Constants_RyzenUniversal_MatchesKnownGuid()
         {
             // Assert - Ryzen Universal GUID is a 1usmus profile
-            Assert.AreEqual("fcaac3f2-997a-4fdb-8e30-c4fb6df29398", Constants.RyzenUniversal,
+            Assert.AreEqual(Guid.Parse("fcaac3f2-997a-4fdb-8e30-c4fb6df29398"), Guid.Parse(Constants.RyzenUniversal),
                 "RyzenUniversal GUID should match the known 1usmus profile GUID");
         }
 
@@ -119,7 +119,7 @@ namespace Power_Plan_Manager_Take_8.Tests
             var uniqueGuids = guids.Distinct().ToList();
 
             // Assert
-            Assert.AreEqual(guids.Length, uniqueGuids.Count,
+            Assert.HasCount(guids.Length, uniqueGuids,
                 "All power plan GUIDs must be unique (no duplicates)");
         }
 
