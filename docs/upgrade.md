@@ -1,0 +1,1 @@
+[ ] On the interface showing current Power Plan
