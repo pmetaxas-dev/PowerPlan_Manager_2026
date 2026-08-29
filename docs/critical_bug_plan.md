@@ -5,7 +5,7 @@
 - Created: 2026-08-20
 - Severity: Critical
 - Target: Microsoft Store update
-- Phase: Bug definition and planning
+- Phase: Planning complete; ready for code investigation
 - Implementation: Not started
 
 ## Reported Bug
@@ -131,12 +131,11 @@ custom plan. The intended product behavior must be confirmed before choosing.
 
 Three systems are available:
 
-- **System 1:** AMD, Windows build `10.0.26200.8655`, affected, and the primary
-  machine for repeated remedy tests.
+- **System 1:** AMD, affected, and the primary machine for repeated remedy tests.
 - **System 2:** Intel, affected, and reserved for secondary cleanup and
-  validation tests. Windows version pending.
+  validation tests.
 - **System 3:** Intel, completely unaffected, and reserved for fresh reproduction
-  and regression testing. Windows version pending.
+  and regression testing. The app has never been installed on this system.
 
 This setup provides affected AMD and Intel environments plus a clean Intel
 baseline.
@@ -161,6 +160,10 @@ state to 50%. The duplicates retained the name `Power saver`.
 ## Engineering and Release Baseline
 
 - The app is a .NET 8 WinForms system-tray utility.
+- Microsoft Store version `2.0.0.0` and local Release version `2.0.1.0` both
+  exhibit the duplicate-plan behavior.
+- The problem is considered Windows-version-independent; further OS-version
+  collection is unnecessary.
 - On 2026-08-19, the documented test suite completed with 57 passed, 0 failed,
   and 0 skipped.
 - Baseline test command:
@@ -199,12 +202,9 @@ state to 50%. The duplicates retained the name `Power saver`.
   installed .NET 9 SDKs. Pin an approved SDK or deliberately document and verify
   the selected release toolchain.
 
-## Information Still Needed
+## Investigation Inputs
 
-- Names shown for the duplicates: `PPM-Idle-Throttle`, `Power saver`, blank, or
-  something else.
-- Whether a new plan appears immediately at launch or after inactivity.
-- The affected published app version.
+- Determine the exact plan-creation timing from the current code.
 - Whether the app should keep one reusable custom plan with a 50% CPU cap or use
   the built-in Energy Saver plan.
 - The performance-plan preference order for AMD, Intel, and unknown CPUs.
@@ -234,6 +234,5 @@ state to 50%. The duplicates retained the name `Power saver`.
 
 ## Planning Rule
 
-From this point forward, this file will record only bug information supplied by
-the user. No further code, log, test, or repository investigation will be
-performed unless the user explicitly changes that instruction.
+Planning is complete. Code investigation is the next phase and will begin only
+when explicitly requested by the user.
