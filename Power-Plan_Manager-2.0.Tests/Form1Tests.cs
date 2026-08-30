@@ -11,12 +11,16 @@ namespace Power_Plan_Manager_Take_8.Tests
     public class Form1Tests
     {
         private Form1? form;
+        private FakePowerPlanStateStore? state;
 
         [TestInitialize]
         public void Setup()
         {
+            state = new FakePowerPlanStateStore();
             // Create form but don't show it
-            form = new Form1();
+            form = new Form1(
+                FakePowerPlanService.CreateDefault(),
+                state);
         }
 
         [TestCleanup]
@@ -136,34 +140,17 @@ namespace Power_Plan_Manager_Take_8.Tests
         }
 
         [TestMethod]
-        public void Form1_Settings_PersistAfterSave()
+        public void Form1_PersistsSelectedActiveUserPlan()
         {
-            // Arrange
-            var originalState = Properties.Settings.Default.Enabled;
-
-            // Act - Toggle and save
-            Properties.Settings.Default.Enabled = !originalState;
-            Properties.Settings.Default.Save();
-
-            // Assert
-            var savedState = Properties.Settings.Default.Enabled;
-            Assert.AreEqual(!originalState, savedState,
-                "Settings should persist after Save()");
-
-            // Cleanup - restore original state
-            Properties.Settings.Default.Enabled = originalState;
-            Properties.Settings.Default.Save();
+            Assert.AreEqual(Constants.UltimatePerformance, state?.NormalPlanGuid);
+            Assert.IsGreaterThan(0, state?.SaveCount ?? 0);
         }
 
         [TestMethod]
-        public void Form1_FirstRunFlag_IsInitialized()
+        public void Form1_UsesInjectedSettingsWithoutUserConfigWrites()
         {
-            // Act
-            var firstRunFlag = Properties.Settings.Default.FirstRun;
-
-            // Assert
-            Assert.IsTrue(firstRunFlag == 0 || firstRunFlag == 1,
-                "FirstRun flag should be either 0 (not first run) or 1 (first run)");
+            Assert.IsNotNull(state);
+            Assert.IsFalse(string.IsNullOrWhiteSpace(state.NormalPlanGuid));
         }
     }
 }

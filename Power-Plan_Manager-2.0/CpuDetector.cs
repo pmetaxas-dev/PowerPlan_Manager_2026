@@ -1,70 +1,163 @@
-using System;
-using System.Diagnostics;
+namespace Power_Plan_Manager_Take_8;
 
-namespace Power_Plan_Manager_Take_8
+/// <summary>
+/// Selects a stable Active User plan without relying on localized names or
+/// machine-specific scheme GUIDs.
+/// </summary>
+public static class PowerPlanDetector
 {
-    /// <summary>
-    /// Utility class to detect available power plans on the system.
-    /// </summary>
-    public static class PowerPlanDetector
+    public static bool IsPowerPlanAvailable(string powerPlanGuid)
     {
-        /// <summary>
-        /// Checks if a power plan with the given GUID is available on the system.
-        /// </summary>
-        /// <param name="powerPlanGuid">The GUID of the power plan to check.</param>
-        /// <returns>True if the power plan is available, false otherwise.</returns>
-        public static bool IsPowerPlanAvailable(string powerPlanGuid)
+        if (!Guid.TryParse(powerPlanGuid, out Guid requestedPlan))
         {
-            try
-            {
-                var psi = new ProcessStartInfo("powercfg", "/list")
-                {
-                    CreateNoWindow = true,
-                    UseShellExecute = false,
-                    RedirectStandardOutput = true
-                };
-
-                using (var process = Process.Start(psi))
-                {
-                    if (process == null) return false;
-
-                    string output = process.StandardOutput.ReadToEnd();
-                    process.WaitForExit();
-
-                    // Check if the GUID appears in the output (case-insensitive)
-                    return output.Contains(powerPlanGuid, StringComparison.OrdinalIgnoreCase);
-                }
-            }
-            catch (Exception ex)
-            {
-                Logger.LogException("PowerPlanDetector.IsPowerPlanAvailable", ex);
-            }
-
             return false;
         }
 
-        /// <summary>
-        /// Gets the best available high-performance power plan:
-        /// Returns Ryzen Universal (or another known Ryzen plan) if available, otherwise Ultimate Performance.
-        /// </summary>
-        /// <returns>The GUID of the selected power plan.</returns>
-        public static string GetOptimalHighPerformancePlan()
+        try
         {
-            // Preferred: 1usmus Ryzen Universal
-            if (IsPowerPlanAvailable(Constants.RyzenUniversal))
-            {
-                return Constants.RyzenUniversal;
-            }
-
-            // Alternate Ryzen variant seen on some systems
-            if (IsPowerPlanAvailable(Constants.RyzenPowerPlan))
-            {
-                return Constants.RyzenPowerPlan;
-            }
-
-            // Fall back to Ultimate Performance
-            return Constants.UltimatePerformance;
+            var service = new WindowsPowerPlanService();
+            return service.GetPlans().Any(plan => plan.Id == requestedPlan);
+        }
+        catch (Exception ex)
+        {
+            Logger.LogException("PowerPlanDetector.IsPowerPlanAvailable", ex);
+            return false;
         }
     }
-}
 
+    public static string GetOptimalHighPerformancePlan()
+    {
+        try
+        {
+            var service = new WindowsPowerPlanService();
+            var state = new SettingsPowerPlanStateStore();
+            IReadOnlyList<PowerPlanInfo> plans = service.GetPlans();
+
+            return SelectActiveUserPlan(
+                    plans,
+                    service.GetActivePlan(),
+                    ParseGuid(state.NormalPlanGuid),
+                    ParseGuid(state.IdleThrottleGuid))
+                .ToString();
+        }
+        catch (Exception ex)
+        {
+            Logger.LogException("PowerPlanDetector.GetOptimalHighPerformancePlan", ex);
+            return Constants.Balanced;
+        }
+    }
+
+    internal static Guid SelectActiveUserPlan(
+        IReadOnlyList<PowerPlanInfo> installedPlans,
+        Guid? currentPlanId,
+        Guid? savedPlanId,
+        Guid? idlePlanId)
+    {
+        if (installedPlans.Count == 0)
+        {
+            throw new InvalidOperationException("No Windows power plans are installed.");
+        }
+
+        PowerPlanInfo? savedPlan = FindEligibleActiveUserPlan(
+            installedPlans,
+            savedPlanId,
+            idlePlanId);
+        if (savedPlan is not null)
+        {
+            return savedPlan.Id;
+        }
+
+        PowerPlanInfo? currentPlan = FindEligibleActiveUserPlan(
+            installedPlans,
+            currentPlanId,
+            idlePlanId);
+
+        bool currentIsPreferred = currentPlan is not null
+            && (currentPlan.Personality == PowerPlanPersonality.MaximumPerformance
+                || currentPlan.Id != Guid.Parse(Constants.Balanced));
+        if (currentIsPreferred)
+        {
+            return currentPlan!.Id;
+        }
+
+        List<PowerPlanInfo> maximumPerformancePlans = installedPlans
+            .Where(plan => IsEligibleActiveUserPlan(plan, idlePlanId)
+                && plan.Personality == PowerPlanPersonality.MaximumPerformance)
+            .OrderBy(plan => plan.Id)
+            .ToList();
+
+        Guid ultimateTemplate = Guid.Parse(Constants.UltimatePerformance);
+        PowerPlanInfo? canonicalUltimate = maximumPerformancePlans.FirstOrDefault(
+            plan => plan.Id == ultimateTemplate);
+        if (canonicalUltimate is not null)
+        {
+            return canonicalUltimate.Id;
+        }
+
+        if (maximumPerformancePlans.Count > 0)
+        {
+            return maximumPerformancePlans[0].Id;
+        }
+
+        if (currentPlan is not null)
+        {
+            return currentPlan.Id;
+        }
+
+        Guid balanced = Guid.Parse(Constants.Balanced);
+        PowerPlanInfo? canonicalBalanced = installedPlans.FirstOrDefault(
+            plan => plan.Id == balanced && IsEligibleActiveUserPlan(plan, idlePlanId));
+        if (canonicalBalanced is not null)
+        {
+            return canonicalBalanced.Id;
+        }
+
+        PowerPlanInfo? fallback = installedPlans
+            .Where(plan => IsEligibleActiveUserPlan(plan, idlePlanId))
+            .OrderBy(plan => plan.Id)
+            .FirstOrDefault();
+
+        return fallback?.Id
+            ?? throw new InvalidOperationException(
+                "No suitable Active User power plan is installed.");
+    }
+
+    internal static bool IsEligibleActiveUserPlan(
+        PowerPlanInfo plan,
+        Guid? idlePlanId)
+    {
+        if (plan.Id == Guid.Parse(Constants.EnergySaver)
+            || plan.Id == idlePlanId
+            || plan.MaxProcessorStateAc != 100
+            || plan.Personality == PowerPlanPersonality.MaximumPowerSavings)
+        {
+            return false;
+        }
+
+        return !string.Equals(
+            plan.Name,
+            Constants.IdleThrottleName,
+            StringComparison.OrdinalIgnoreCase);
+    }
+
+    private static PowerPlanInfo? FindEligibleActiveUserPlan(
+        IReadOnlyList<PowerPlanInfo> plans,
+        Guid? planId,
+        Guid? idlePlanId)
+    {
+        if (!planId.HasValue)
+        {
+            return null;
+        }
+
+        PowerPlanInfo? plan = plans.FirstOrDefault(candidate => candidate.Id == planId.Value);
+        return plan is not null && IsEligibleActiveUserPlan(plan, idlePlanId)
+            ? plan
+            : null;
+    }
+
+    internal static Guid? ParseGuid(string value)
+    {
+        return Guid.TryParse(value, out Guid parsed) ? parsed : null;
+    }
+}

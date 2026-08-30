@@ -1,630 +1,666 @@
-﻿using System;
 using System.Runtime.InteropServices;
-using System.Threading.Tasks;
-using System.Windows.Forms;
-using System.Diagnostics;
-using System.Text.RegularExpressions;
-using System.Text;
-using System.Collections.Generic;
 
-namespace Power_Plan_Manager_Take_8
+namespace Power_Plan_Manager_Take_8;
+
+public class IdleChecker : IDisposable
 {
-    public class IdleChecker : IDisposable
+    private const int DefaultIdleTimeoutSeconds = 90;
+    private const int DefaultInputCheckIntervalSeconds = 5;
+
+    private readonly IPowerPlanService powerPlans;
+    private readonly IPowerPlanStateStore stateStore;
+    private readonly object powerOperationLock = new();
+    private readonly Guid normalPlanId;
+    private readonly System.Windows.Forms.Timer idleCheckTimer = new();
+    private readonly System.Windows.Forms.Timer userInputCheckTimer = new();
+
+    private Guid? idleThrottlePlanId;
+    private volatile bool disposed;
+
+    [DllImport("user32.dll")]
+    private static extern bool GetLastInputInfo(ref LastInputInfo lastInputInfo);
+
+    [StructLayout(LayoutKind.Sequential)]
+    private struct LastInputInfo
     {
-        [DllImport("user32.dll")]
-        static extern bool GetLastInputInfo(ref LASTINPUTINFO usr);
+        public uint Size;
+        public uint Time;
+    }
 
-        [DllImport("powrprof.dll")]
-        static extern uint PowerSetActiveScheme(IntPtr RootPowerKey, ref Guid SchemeGuid);
+    public IdleChecker(string systemActivePlan)
+        : this(
+            ParseNormalPlan(systemActivePlan),
+            new WindowsPowerPlanService(),
+            new SettingsPowerPlanStateStore(),
+            startTimers: true)
+    {
+    }
 
-        [DllImport("powrprof.dll")]
-        static extern uint PowerGetActiveScheme(IntPtr UserRootPowerKey, out IntPtr ActivePolicyGuid);
+    internal IdleChecker(
+        Guid normalPlan,
+        IPowerPlanService powerPlanService,
+        IPowerPlanStateStore powerPlanStateStore,
+        bool startTimers)
+    {
+        normalPlanId = normalPlan;
+        powerPlans = powerPlanService ?? throw new ArgumentNullException(nameof(powerPlanService));
+        stateStore = powerPlanStateStore ?? throw new ArgumentNullException(nameof(powerPlanStateStore));
 
-        [DllImport("kernel32.dll")]
-        static extern IntPtr LocalFree(IntPtr hMem);
+        int idleTimeoutSeconds = GetIdleTimeoutSeconds();
+        int inputCheckIntervalSeconds = GetInputCheckIntervalSeconds();
 
-        [DllImport("powrprof.dll")]
-        static extern uint PowerDuplicateScheme(IntPtr RootPowerKey, ref Guid SourceSchemeGuid, out Guid DestinationSchemeGuid);
+        Logger.Log(
+            $"IdleChecker initialized with idle timeout: {idleTimeoutSeconds}s, "
+            + $"input check interval: {inputCheckIntervalSeconds}s");
+        Logger.Log($"Normal power plan stored: {normalPlanId}");
 
-        [DllImport("powrprof.dll")]
-        static extern uint PowerDeleteScheme(IntPtr RootPowerKey, ref Guid SchemeGuid);
+        InitializePowerPlanLifecycle();
 
-        [DllImport("powrprof.dll")]
-        static extern uint PowerWriteACValueIndex(IntPtr RootPowerKey, ref Guid SchemeGuid, ref Guid SubGroupOfPowerSettingsGuid, ref Guid PowerSettingGuid, uint AcValueIndex);
+        idleCheckTimer.Interval = idleTimeoutSeconds * 1000;
+        idleCheckTimer.Tick += IdleCheckTimer_Tick;
 
-        [DllImport("powrprof.dll")]
-        static extern uint PowerWriteDCValueIndex(IntPtr RootPowerKey, ref Guid SchemeGuid, ref Guid SubGroupOfPowerSettingsGuid, ref Guid PowerSettingGuid, uint DcValueIndex);
+        userInputCheckTimer.Interval = inputCheckIntervalSeconds * 1000;
+        userInputCheckTimer.Tick += UserInputCheckTimer_Tick;
 
-        [DllImport("powrprof.dll")]
-        static extern uint PowerReadACValueIndex(IntPtr RootPowerKey, ref Guid SchemeGuid, ref Guid SubGroupOfPowerSettingsGuid, ref Guid PowerSettingGuid, out uint AcValueIndex);
-
-        [DllImport("powrprof.dll")]
-        static extern uint PowerReadDCValueIndex(IntPtr RootPowerKey, ref Guid SchemeGuid, ref Guid SubGroupOfPowerSettingsGuid, ref Guid PowerSettingGuid, out uint DcValueIndex);
-
-        [DllImport("powrprof.dll", CharSet = CharSet.Unicode)]
-        static extern uint PowerWriteFriendlyName(IntPtr RootPowerKey, ref Guid SchemeGuid, IntPtr SubGroupOfPowerSettingsGuid, IntPtr PowerSettingGuid, string Buffer, uint BufferSize);
-
-        // Processor Power Management subgroup GUID
-        private static readonly Guid GUID_PROCESSOR_SUBGROUP = new Guid("54533251-82be-4824-96c1-47b60b740d00");
-        // Maximum processor state setting GUID
-        private static readonly Guid GUID_PROCESSOR_THROTTLE_MAXIMUM = new Guid("bc5038f7-23e0-4960-96da-33abaf5935ec");
-
-
-        internal struct LASTINPUTINFO
+        if (startTimers)
         {
-            public uint cbSize;
-            public uint dwTime;
-        }
-
-        // Elevated deletion is intentionally omitted. Deletions should succeed via PowerDeleteScheme API.
-
-        /// <summary>
-        /// Removes redundant Energy Saver / PPM throttle power schemes by enumerating
-        /// installed power schemes (via `powercfg /list`) and deleting any non-original
-        /// schemes that match the Energy Saver friendly name or the app-created name
-        /// "PPM-Idle-Throttle". Skips the original Energy Saver GUID.
-        /// This runs in a background task and logs actions.
-        /// </summary>
-        public void RemoveRedundantEnergySaverPlans()
-        {
-            if (disposed) return;
-
-            Task.Run(() =>
-            {
-                try
-                {
-                    string output = RunPowerCfg("/list");
-                    Logger.Log($"RemoveRedundantEnergySaverPlans: powercfg /list output length={output?.Length ?? 0}");
-                    if (string.IsNullOrWhiteSpace(output))
-                    {
-                        Logger.Log("RemoveRedundantEnergySaverPlans: no output from powercfg /list");
-                        return;
-                    }
-                    Logger.Log("RemoveRedundantEnergySaverPlans: powercfg /list output:\n" + output);
-
-                    // Regex to capture lines like: Power Scheme GUID: GUID  (Name)
-                    // Handles GUIDs with or without braces and optional trailing asterisk for active scheme
-                    var rx = new Regex("Power Scheme GUID:\\s*\\{?([0-9a-fA-F\\-]+)\\}?\\s*\\(?\\s*(.*?)\\s*\\)?\\s*(?:\\*)?", RegexOptions.IgnoreCase);
-                    var matches = rx.Matches(output);
-                    Logger.Log($"RemoveRedundantEnergySaverPlans: regex matched {matches.Count} lines");
-
-                    string activeGuid = GetSystemActivePlan();
-
-                    var candidates = new List<(string guid, string name)>();
-                    foreach (Match m in matches)
-                    {
-                        string guid = m.Groups[1].Value.Trim();
-                        string name = m.Groups[2].Value.Trim();
-                        Logger.Log($"RemoveRedundantEnergySaverPlans: found entry guid='{guid}' name='{name}'");
-
-                        // Normalize for comparison
-                        string nameLower = name.ToLowerInvariant();
-
-                        bool isPpmName = string.Equals(name, "PPM-Idle-Throttle", StringComparison.OrdinalIgnoreCase);
-                        bool isEnergySaverName = nameLower.Contains("power saver") || nameLower.Contains("energy saver") || nameLower.Contains("power-saver");
-
-                        if (!string.IsNullOrWhiteSpace(name))
-                        {
-                            if ((isPpmName || isEnergySaverName) && !string.Equals(guid, Constants.EnergySaver, StringComparison.OrdinalIgnoreCase))
-                            {
-                                candidates.Add((guid, name));
-                            }
-                        }
-                        else
-                        {
-                            // Unnamed schemes: add for probing unless they are known canonical plans
-                            if (!string.Equals(guid, Constants.EnergySaver, StringComparison.OrdinalIgnoreCase)
-                                && !string.Equals(guid, Constants.HighPerformance, StringComparison.OrdinalIgnoreCase)
-                                && !string.Equals(guid, Constants.UltimatePerformance, StringComparison.OrdinalIgnoreCase)
-                                && !string.Equals(guid, Constants.RyzenUniversal, StringComparison.OrdinalIgnoreCase))
-                            {
-                                candidates.Add((guid, name));
-                            }
-                        }
-                    }
-
-                    if (candidates.Count == 0)
-                    {
-                        Logger.Log("RemoveRedundantEnergySaverPlans: no candidates found.");
-                        return;
-                    }
-
-                    // Try to delete candidates using the API first. Collect those that still need elevated deletion.
-                    var needElevation = new List<string>();
-                    foreach (var (guid, name) in candidates)
-                    {
-                        // If the friendly name is empty, try to detect if this scheme is a 50% throttle duplicate
-                        bool considerForDeletion = true;
-                        if (string.IsNullOrWhiteSpace(name))
-                        {
-                            considerForDeletion = false;
-                            try
-                            {
-                                if (Guid.TryParse(guid, out Guid probeGuid))
-                                {
-                                    uint acVal;
-                                    uint dcVal;
-                                    Guid subgroupLocal = GUID_PROCESSOR_SUBGROUP;
-                                    Guid settingLocal = GUID_PROCESSOR_THROTTLE_MAXIMUM;
-                                    uint r1 = PowerReadACValueIndex(IntPtr.Zero, ref probeGuid, ref subgroupLocal, ref settingLocal, out acVal);
-                                    uint r2 = PowerReadDCValueIndex(IntPtr.Zero, ref probeGuid, ref subgroupLocal, ref settingLocal, out dcVal);
-                                    Logger.Log($"RemoveRedundantEnergySaverPlans: ReadAC/DC for {probeGuid} -> r1={r1} ac={acVal}, r2={r2} dc={dcVal}");
-                                    // If either AC or DC reads successfully and equals 50, treat as candidate
-                                    if ((r1 == 0 && acVal == 50) || (r2 == 0 && dcVal == 50))
-                                    {
-                                        considerForDeletion = true;
-                                        Logger.Log($"RemoveRedundantEnergySaverPlans: {probeGuid} identified as throttle duplicate (50%).");
-                                    }
-                                }
-                            }
-                            catch (Exception ex)
-                            {
-                                Logger.LogException("RemoveRedundantEnergySaverPlans.Probe", ex);
-                            }
-                        }
-
-                        if (!considerForDeletion)
-                        {
-                            Logger.Log($"Skipping {guid} ('{name}') - not identified as duplicate.");
-                            continue;
-                        }
-                        try
-                        {
-                            Logger.Log($"Attempting to delete redundant power scheme {guid} ('{name}') via API");
-
-                            // If it's the currently active scheme, switch to a safe plan first
-                            if (string.Equals(guid, activeGuid, StringComparison.OrdinalIgnoreCase))
-                            {
-                                Logger.Log($"Target is active scheme; switching to {Constants.HighPerformance} before deletion");
-                                var t = ChangePowerPlan(Constants.HighPerformance);
-                                t?.Wait(1000);
-                            }
-
-                            if (Guid.TryParse(guid, out Guid deleteGuid))
-                            {
-                                uint delRes = PowerDeleteScheme(IntPtr.Zero, ref deleteGuid);
-                                Logger.Log($"PowerDeleteScheme result for {deleteGuid}: {delRes}");
-                                if (delRes != 0)
-                                {
-                                    needElevation.Add(guid);
-                                }
-                            }
-                            else
-                            {
-                                // parsing failed, try powercfg (may still require elevation)
-                                string deleteOutput = RunPowerCfg($"/delete {guid}");
-                                Logger.Log($"powercfg delete output for {guid}: {deleteOutput}");
-                                // If output indicates failure, schedule for elevation
-                                if (deleteOutput.IndexOf("Access is denied", StringComparison.OrdinalIgnoreCase) >= 0 || deleteOutput.IndexOf("failed", StringComparison.OrdinalIgnoreCase) >= 0)
-                                    needElevation.Add(guid);
-                            }
-                        }
-                        catch (Exception ex)
-                        {
-                            Logger.LogException("RemoveRedundantEnergySaverPlans.Delete", ex);
-                            needElevation.Add(guid);
-                        }
-                    }
-
-                    if (needElevation.Count > 0)
-                    {
-                        // Log schemes that could not be deleted via API. Do not prompt for elevation in normal runs.
-                        Logger.Log($"Could not delete {needElevation.Count} schemes via API; skipping elevation. GUIDs: {string.Join(",", needElevation)}");
-                    }
-                }
-                catch (Exception ex)
-                {
-                    Logger.LogException("RemoveRedundantEnergySaverPlans", ex);
-                }
-            });
-        }
-
-        private string RunPowerCfg(string args)
-        {
-            try
-            {
-                var psi = new ProcessStartInfo("powercfg", args)
-                {
-                    RedirectStandardOutput = true,
-                    RedirectStandardError = true,
-                    UseShellExecute = false,
-                    CreateNoWindow = true,
-                };
-
-                using (var p = Process.Start(psi))
-                {
-                    if (p == null) return string.Empty;
-                    var sb = new StringBuilder();
-                    sb.AppendLine(p.StandardOutput.ReadToEnd());
-                    sb.AppendLine(p.StandardError.ReadToEnd());
-                    p.WaitForExit();
-                    return sb.ToString();
-                }
-            }
-            catch (Exception ex)
-            {
-                Logger.LogException("RunPowerCfg", ex);
-                return string.Empty;
-            }
-        }
-
-        /// <summary>
-        /// Default timeout (in seconds) before the system is considered idle.
-        /// </summary>
-        private const int DEFAULT_IDLE_TIMEOUT_SECONDS = 90;
-
-        /// <summary>
-        /// Default interval (in seconds) for checking user input when in idle mode.
-        /// </summary>
-        private const int DEFAULT_INPUT_CHECK_INTERVAL_SECONDS = 5;
-
-        /// <summary>
-        /// Gets the configured idle timeout in seconds from settings, or default if not set.
-        /// </summary>
-        private static int GetIdleTimeoutSeconds()
-        {
-            try
-            {
-                // Try to get from settings if property exists
-                var idleTimeoutProp = Properties.Settings.Default.Properties["IdleTimeoutSeconds"];
-                if (idleTimeoutProp != null)
-                {
-                    int value = (int)Properties.Settings.Default["IdleTimeoutSeconds"];
-                    if (value > 0) return value;
-                }
-            }
-            catch { /* Fall through to default */ }
-            return DEFAULT_IDLE_TIMEOUT_SECONDS;
-        }
-
-        /// <summary>
-        /// Gets the configured input check interval in seconds from settings, or default if not set.
-        /// </summary>
-        private static int GetInputCheckIntervalSeconds()
-        {
-            try
-            {
-                // Try to get from settings if property exists
-                var inputCheckProp = Properties.Settings.Default.Properties["InputCheckIntervalSeconds"];
-                if (inputCheckProp != null)
-                {
-                    int value = (int)Properties.Settings.Default["InputCheckIntervalSeconds"];
-                    if (value > 0) return value;
-                }
-            }
-            catch { /* Fall through to default */ }
-            return DEFAULT_INPUT_CHECK_INTERVAL_SECONDS;
-        }
-
-        private bool disposed = false;
-        private string activePowerPlan = "";
-        private Guid? _idleThrottleSchemeGuid = null;
-        private readonly object _throttleLock = new object();
-
-        /// <summary>The system power plan that was active when the app started.</summary>
-        public string SystemActivePlan => activePowerPlan;
-
-        private System.Windows.Forms.Timer idleCheckTimer = new System.Windows.Forms.Timer();
-        private System.Windows.Forms.Timer userInputCheckTimer = new System.Windows.Forms.Timer();
-
-
-
-        public IdleChecker(string systemActivePlan)
-        {
-            // Get configured timeouts (or use defaults)
-            int idleTimeoutSeconds = GetIdleTimeoutSeconds();
-            int inputCheckIntervalSeconds = GetInputCheckIntervalSeconds();
-
-            Logger.Log($"IdleChecker initialized with idle timeout: {idleTimeoutSeconds}s, input check interval: {inputCheckIntervalSeconds}s");
-
-            // Store the system plan — do NOT switch the plan on startup
-            activePowerPlan = systemActivePlan;
-            Logger.Log($"System active power plan stored: {activePowerPlan}");
-            idleCheckTimer.Interval = idleTimeoutSeconds * 1000;
-            idleCheckTimer.Tick += IdleCheckTimer_Tick;
             idleCheckTimer.Start();
-
-            userInputCheckTimer.Interval = inputCheckIntervalSeconds * 1000;
-            userInputCheckTimer.Tick += UserInputCheckTimer_Tick;
         }
+    }
 
-        private void IdleCheckTimer_Tick(object? sender, EventArgs e)
+    public string SystemActivePlan => normalPlanId.ToString();
+
+    internal Guid? IdleThrottlePlanId => idleThrottlePlanId;
+
+    public static string GetSystemActivePlan()
+    {
+        try
         {
-            LASTINPUTINFO lastInputInfo = new LASTINPUTINFO();
-            lastInputInfo.cbSize = (uint)Marshal.SizeOf(lastInputInfo);
-            GetLastInputInfo(ref lastInputInfo);
-
-            long idleTime = (Environment.TickCount64 - (long)lastInputInfo.dwTime) / 1000;
-
-            if (idleTime >= idleCheckTimer.Interval / 1000 && Properties.Settings.Default.Enabled == true)
-            {                
-                ActivateIdleThrottlePlan(); // Energy Saver + 50% max CPU throttle
-                idleCheckTimer.Stop();// Stop counting idle time and..
-                userInputCheckTimer.Start(); // ..start checking for user input
-            }            
-        }
-
-        private void UserInputCheckTimer_Tick(object? sender, EventArgs e)
-        {
-            LASTINPUTINFO lastInputInfo = new LASTINPUTINFO();
-            lastInputInfo.cbSize = (uint)Marshal.SizeOf(lastInputInfo);
-            GetLastInputInfo(ref lastInputInfo);
-
-            long idleTime = (Environment.TickCount64 - (long)lastInputInfo.dwTime) / 1000;
-
-            if (idleTime < userInputCheckTimer.Interval / 1000 && Properties.Settings.Default.Enabled == true)
+            var service = new WindowsPowerPlanService();
+            Guid? activePlan = service.GetActivePlan();
+            if (activePlan.HasValue)
             {
-                CleanupIdleThrottlePlan(); // Delete throttle duplicate and restore active plan
-                userInputCheckTimer.Stop(); // Stop checking for user input and..
-                idleCheckTimer.Start(); // ..start counting idle time.
-            }            
-        }
-
-        /// <summary>
-        /// Returns the GUID string of the currently active Windows power scheme.
-        /// Falls back to Ultimate Performance if the call fails.
-        /// </summary>
-        public static string GetSystemActivePlan()
-        {
-            try
-            {
-                uint result = PowerGetActiveScheme(IntPtr.Zero, out IntPtr guidPtr);
-                if (result == 0 && guidPtr != IntPtr.Zero)
-                {
-                    try
-                    {
-                        Guid guid = (Guid)System.Runtime.InteropServices.Marshal.PtrToStructure(guidPtr, typeof(Guid))!;
-                        return guid.ToString();
-                    }
-                    finally
-                    {
-                        LocalFree(guidPtr);
-                    }
-                }
+                return activePlan.Value.ToString();
             }
-            catch (Exception ex)
-            {
-                Logger.LogException("IdleChecker.GetSystemActivePlan", ex);
-            }
-
-            // Fallback: use optimal high-performance plan
-            return PowerPlanDetector.GetOptimalHighPerformancePlan();
+        }
+        catch (Exception ex)
+        {
+            Logger.LogException("IdleChecker.GetSystemActivePlan", ex);
         }
 
-        /// <summary>
-        /// Duplicates the Energy Saver scheme, caps max processor state to 50% on both
-        /// AC and DC, names it "PPM-Idle-Throttle", and activates it.
-        /// No elevation required — operates on a user-owned duplicate.
-        /// </summary>
-        private void ActivateIdleThrottlePlan()
+        return PowerPlanDetector.GetOptimalHighPerformancePlan();
+    }
+
+    public Task ChangePowerPlan(string powerPlanGuid)
+    {
+        if (!Guid.TryParse(powerPlanGuid, out Guid planId))
         {
-            if (disposed) return;
-            Task.Run(() =>
-            {
-                try
-                {
-                    // Clean up any previous duplicate first (in-memory and persisted from prior runs)
-                    CleanupIdleThrottleDuplicate();
-                    CleanupPersistedIdleThrottleDuplicate();
-
-                    Guid sourcePlan = new Guid(Constants.EnergySaver);
-                    uint result = PowerDuplicateScheme(IntPtr.Zero, ref sourcePlan, out Guid newScheme);
-                    if (result != 0)
-                    {
-                        Logger.Log($"PowerDuplicateScheme failed: {result}. Falling back to plain Energy Saver.");
-                        ChangePowerPlan(Constants.EnergySaver);
-                        return;
-                    }
-
-                    Guid subgroup = GUID_PROCESSOR_SUBGROUP;
-                    Guid setting  = GUID_PROCESSOR_THROTTLE_MAXIMUM;
-                    const uint MAX_PROCESSOR_50 = 50;
-
-                    PowerWriteACValueIndex(IntPtr.Zero, ref newScheme, ref subgroup, ref setting, MAX_PROCESSOR_50);
-                    PowerWriteDCValueIndex(IntPtr.Zero, ref newScheme, ref subgroup, ref setting, MAX_PROCESSOR_50);
-
-                    // Give it a recognizable name
-                    PowerWriteFriendlyName(IntPtr.Zero, ref newScheme, IntPtr.Zero, IntPtr.Zero, "PPM-Idle-Throttle", (uint)("PPM-Idle-Throttle".Length + 1) * 2);
-
-                    uint activateResult = PowerSetActiveScheme(IntPtr.Zero, ref newScheme);
-                    if (activateResult == 0)
-                    {
-                        lock (_throttleLock)
-                        {
-                            _idleThrottleSchemeGuid = newScheme;
-                        }
-                        // Persist the GUID so future app restarts can clean it up
-                        try
-                        {
-                            Properties.Settings.Default["IdleThrottleGuid"] = newScheme.ToString();
-                            Properties.Settings.Default.Save();
-                        }
-                        catch (Exception ex)
-                        {
-                            Logger.LogException("ActivateIdleThrottlePlan.PersistIdleGuid", ex);
-                        }
-                        Logger.Log($"Idle throttle plan activated (50% max CPU): {newScheme}");
-                    }
-                    else
-                    {
-                        Logger.Log($"PowerSetActiveScheme failed for throttle plan: {activateResult}. Deleting duplicate.");
-                        PowerDeleteScheme(IntPtr.Zero, ref newScheme);
-                        ChangePowerPlan(Constants.EnergySaver);
-                    }
-                }
-                catch (Exception ex)
-                {
-                    Logger.LogException("ActivateIdleThrottlePlan", ex);
-                    ChangePowerPlan(Constants.EnergySaver);
-                }
-            });
+            Logger.Log($"Invalid power plan GUID: {powerPlanGuid}");
+            return Task.CompletedTask;
         }
 
-        /// <summary>
-        /// Deletes the temporary throttle duplicate (if any) and restores the stored active plan.
-        /// </summary>
-        private void CleanupIdleThrottlePlan()
-        {
-            if (disposed) return;
-            Task.Run(() =>
-            {
-                try
-                {
-                    CleanupIdleThrottleDuplicate();
+        return RunPowerOperationAsync(
+            "ChangePowerPlan",
+            () => ActivatePlan(planId, "Power plan changed"));
+    }
 
-                    if (Guid.TryParse(activePowerPlan, out Guid restore))
-                    {
-                        uint result = PowerSetActiveScheme(IntPtr.Zero, ref restore);
-                        if (result == 0)
-                            Logger.Log($"Restored active plan: {activePowerPlan}");
-                        else
-                            Logger.Log($"PowerSetActiveScheme restore failed: {result}");
-                    }
-                }
-                catch (Exception ex)
-                {
-                    Logger.LogException("CleanupIdleThrottlePlan", ex);
-                }
-            });
+    internal Task EnterIdleModeAsync()
+    {
+        return RunPowerOperationAsync("EnterIdleMode", ActivateIdleThrottlePlan);
+    }
+
+    internal Task ExitIdleModeAsync()
+    {
+        return RunPowerOperationAsync(
+            "ExitIdleMode",
+            () => ActivatePlan(normalPlanId, "Normal power plan restored"));
+    }
+
+    private static Guid ParseNormalPlan(string systemActivePlan)
+    {
+        if (Guid.TryParse(systemActivePlan, out Guid normalPlan))
+        {
+            return normalPlan;
         }
 
-        private void CleanupIdleThrottleDuplicate()
+        return Guid.Parse(PowerPlanDetector.GetOptimalHighPerformancePlan());
+    }
+
+    private void InitializePowerPlanLifecycle()
+    {
+        lock (powerOperationLock)
         {
-            Guid? toDelete = null;
-            lock (_throttleLock)
+            uint activateResult = powerPlans.SetActivePlan(normalPlanId);
+            if (activateResult != 0)
             {
-                toDelete = _idleThrottleSchemeGuid;
-                _idleThrottleSchemeGuid = null;
+                Logger.Log(
+                    $"Unable to activate normal plan {normalPlanId} during startup: "
+                    + $"result={activateResult}. Cleanup and provisioning skipped.");
+                return;
             }
 
-            if (toDelete.HasValue)
+            PersistNormalPlan(normalPlanId);
+            idleThrottlePlanId = FindOrCreateIdleThrottlePlan();
+            if (idleThrottlePlanId.HasValue)
             {
-                Guid g = toDelete.Value;
-                uint result = PowerDeleteScheme(IntPtr.Zero, ref g);
-                Logger.Log($"Deleted idle throttle duplicate {g}: result={result}");
+                RunLegacyCleanupOnce(idleThrottlePlanId.Value);
             }
             else
             {
-                // No in-memory duplicate; attempt to remove any persisted GUID from previous runs
+                Logger.Log(
+                    "Legacy cleanup skipped because no verified idle plan is available to retain.");
+            }
+        }
+    }
+
+    private void RunLegacyCleanupOnce(Guid retainedIdlePlanId)
+    {
+        if (stateStore.LegacyCleanupVersion >= Constants.LegacyCleanupVersion)
+        {
+            return;
+        }
+
+        try
+        {
+            IReadOnlyList<PowerPlanInfo> plans = powerPlans.GetPlans();
+            List<PowerPlanInfo> candidates = plans
+                .Where(plan => IsCleanupCandidate(
+                    plan,
+                    retainedIdlePlanId,
+                    normalPlanId))
+                .ToList();
+
+            bool allDeletesSucceeded = true;
+            foreach (PowerPlanInfo candidate in candidates)
+            {
+                uint result = powerPlans.DeletePlan(candidate.Id);
+                Logger.Log(
+                    $"Legacy cleanup delete {candidate.Id} ('{candidate.Name}'): "
+                    + $"result={result}");
+                allDeletesSucceeded &= result == 0;
+            }
+
+            IReadOnlyList<PowerPlanInfo> remainingPlans = powerPlans.GetPlans();
+            bool candidatesRemain = remainingPlans.Any(
+                plan => IsCleanupCandidate(
+                    plan,
+                    retainedIdlePlanId,
+                    normalPlanId));
+
+            if (allDeletesSucceeded && !candidatesRemain)
+            {
+                stateStore.LegacyCleanupVersion = Constants.LegacyCleanupVersion;
+                stateStore.Save();
+                Logger.Log(
+                    $"Legacy power-plan cleanup version {Constants.LegacyCleanupVersion} "
+                    + "completed and verified.");
+            }
+            else
+            {
+                Logger.Log(
+                    "Legacy power-plan cleanup was not verified; it will retry on next startup.");
+            }
+        }
+        catch (Exception ex)
+        {
+            Logger.LogException("IdleChecker.RunLegacyCleanupOnce", ex);
+        }
+    }
+
+    internal static bool IsCleanupCandidate(
+        PowerPlanInfo plan,
+        Guid retainedIdlePlanId,
+        Guid normalPlanId)
+    {
+        if (plan.Id == Guid.Parse(Constants.EnergySaver)
+            || plan.Id == retainedIdlePlanId
+            || plan.Id == normalPlanId)
+        {
+            return false;
+        }
+
+        return plan.Personality == PowerPlanPersonality.MaximumPowerSavings
+            && plan.MaxProcessorStateAc.HasValue
+            && plan.MaxProcessorStateAc.Value < 100;
+    }
+
+    private Guid? FindOrCreateIdleThrottlePlan()
+    {
+        try
+        {
+            IReadOnlyList<PowerPlanInfo> plans = powerPlans.GetPlans();
+
+            if (Guid.TryParse(stateStore.IdleThrottleGuid, out Guid persistedPlanId))
+            {
+                PowerPlanInfo? persistedPlan = plans.FirstOrDefault(
+                    plan => plan.Id == persistedPlanId);
+
+                if (persistedPlan is not null && IsValidIdleThrottlePlan(persistedPlan))
+                {
+                    RemoveExtraManagedPlans(plans, persistedPlan.Id);
+                    return persistedPlan.Id;
+                }
+            }
+
+            List<PowerPlanInfo> managedPlans = plans
+                .Where(plan => string.Equals(
+                    plan.Name,
+                    Constants.IdleThrottleName,
+                    StringComparison.OrdinalIgnoreCase))
+                .ToList();
+
+            PowerPlanInfo? reusablePlan = managedPlans.FirstOrDefault(IsValidIdleThrottlePlan);
+            if (reusablePlan is not null)
+            {
+                RemoveExtraManagedPlans(plans, reusablePlan.Id);
+                PersistIdleThrottlePlan(reusablePlan.Id);
+                return reusablePlan.Id;
+            }
+
+            if (managedPlans.Count > 0)
+            {
+                PowerPlanInfo repairCandidate = managedPlans[0];
+                uint repairStateResult = powerPlans.SetMaxProcessorState(
+                    repairCandidate.Id,
+                    Constants.IdleMaxProcessorState);
+                uint repairNameResult = powerPlans.SetFriendlyName(
+                    repairCandidate.Id,
+                    Constants.IdleThrottleName);
+
+                PowerPlanInfo? repairedPlan = powerPlans.GetPlans()
+                    .FirstOrDefault(plan => plan.Id == repairCandidate.Id);
+                if (repairStateResult == 0
+                    && repairNameResult == 0
+                    && repairedPlan is not null
+                    && IsValidIdleThrottlePlan(repairedPlan))
+                {
+                    RemoveExtraManagedPlans(plans, repairedPlan.Id);
+                    PersistIdleThrottlePlan(repairedPlan.Id);
+                    Logger.Log($"Managed idle plan repaired and reused: {repairedPlan.Id}");
+                    return repairedPlan.Id;
+                }
+            }
+
+            bool invalidManagedPlanRemains = false;
+            foreach (PowerPlanInfo invalidManagedPlan in managedPlans)
+            {
+                if (!IsCleanupCandidate(
+                    invalidManagedPlan,
+                    retainedIdlePlanId: Guid.Empty,
+                    normalPlanId))
+                {
+                    Logger.Log(
+                        $"Preserved managed-name plan {invalidManagedPlan.Id} because "
+                        + "it does not match the legacy cleanup signature.");
+                    invalidManagedPlanRemains = true;
+                    continue;
+                }
+
+                uint deleteResult = powerPlans.DeletePlan(invalidManagedPlan.Id);
+                Logger.Log(
+                    $"Removed invalid managed idle plan {invalidManagedPlan.Id}: "
+                    + $"result={deleteResult}");
+                invalidManagedPlanRemains |= deleteResult != 0;
+            }
+
+            if (invalidManagedPlanRemains)
+            {
+                Logger.Log(
+                    "An invalid managed-name plan was preserved or could not be removed; "
+                    + "new plan creation was skipped to prevent accumulation.");
+                return null;
+            }
+
+            IReadOnlyList<PowerPlanInfo> adoptionPlans = powerPlans.GetPlans();
+            PowerPlanInfo? reusableSavingsPlan = adoptionPlans
+                .Where(IsReusableSavingsPlan)
+                .OrderByDescending(IsValidIdleThrottlePlan)
+                .ThenBy(plan => plan.Id)
+                .FirstOrDefault();
+
+            if (reusableSavingsPlan is not null)
+            {
+                if (!IsValidIdleThrottlePlan(reusableSavingsPlan))
+                {
+                    if (!powerPlans.CanWriteProcessorState())
+                    {
+                        Logger.Log(
+                            $"Cannot configure retained savings plan {reusableSavingsPlan.Id}; "
+                            + "idle-plan adoption and cleanup skipped.");
+                        return null;
+                    }
+
+                    uint configureResult = powerPlans.SetMaxProcessorState(
+                        reusableSavingsPlan.Id,
+                        Constants.IdleMaxProcessorState);
+                    if (configureResult != 0)
+                    {
+                        Logger.Log(
+                            $"Failed to configure retained savings plan {reusableSavingsPlan.Id}: "
+                            + $"result={configureResult}.");
+                        return null;
+                    }
+
+                    reusableSavingsPlan = powerPlans.GetPlans().FirstOrDefault(
+                        plan => plan.Id == reusableSavingsPlan.Id);
+                }
+
+                if (reusableSavingsPlan is not null
+                    && IsValidIdleThrottlePlan(reusableSavingsPlan))
+                {
+                    PersistIdleThrottlePlan(reusableSavingsPlan.Id);
+                    Logger.Log(
+                        $"Existing savings plan retained for idle use: {reusableSavingsPlan.Id}");
+                    return reusableSavingsPlan.Id;
+                }
+
+                Logger.Log("Retained savings plan failed verification; cleanup skipped.");
+                return null;
+            }
+
+            if (!powerPlans.CanCreateScheme() || !powerPlans.CanWriteProcessorState())
+            {
+                Logger.Log(
+                    "Current user or policy does not allow creation/configuration "
+                    + "of the managed idle plan.");
+                return null;
+            }
+
+            Guid energySaver = Guid.Parse(Constants.EnergySaver);
+            Guid balanced = Guid.Parse(Constants.Balanced);
+            Guid sourcePlan = plans.Any(plan => plan.Id == energySaver)
+                ? energySaver
+                : balanced;
+
+            if (!plans.Any(plan => plan.Id == sourcePlan))
+            {
+                Logger.Log("No suitable source plan exists for idle-plan provisioning.");
+                return null;
+            }
+
+            uint duplicateResult = powerPlans.DuplicatePlan(sourcePlan, out Guid newPlanId);
+            if (duplicateResult != 0 || newPlanId == Guid.Empty)
+            {
+                Logger.Log($"Managed idle-plan duplication failed: result={duplicateResult}");
+                return null;
+            }
+
+            uint maxStateResult = powerPlans.SetMaxProcessorState(
+                newPlanId,
+                Constants.IdleMaxProcessorState);
+            uint nameResult = powerPlans.SetFriendlyName(
+                newPlanId,
+                Constants.IdleThrottleName);
+
+            if (maxStateResult != 0 || nameResult != 0)
+            {
+                Logger.Log(
+                    $"Managed idle-plan configuration failed: max={maxStateResult}, "
+                    + $"name={nameResult}. Deleting {newPlanId}.");
+                powerPlans.DeletePlan(newPlanId);
+                return null;
+            }
+
+            PowerPlanInfo? verifiedPlan = powerPlans.GetPlans()
+                .FirstOrDefault(plan => plan.Id == newPlanId);
+            if (verifiedPlan is null || !IsValidIdleThrottlePlan(verifiedPlan))
+            {
+                Logger.Log($"Managed idle plan {newPlanId} failed verification; deleting it.");
+                powerPlans.DeletePlan(newPlanId);
+                return null;
+            }
+
+            PersistIdleThrottlePlan(newPlanId);
+            Logger.Log($"Managed idle plan provisioned once: {newPlanId}");
+            return newPlanId;
+        }
+        catch (Exception ex)
+        {
+            Logger.LogException("IdleChecker.FindOrCreateIdleThrottlePlan", ex);
+            return null;
+        }
+    }
+
+    private static bool IsValidIdleThrottlePlan(PowerPlanInfo plan)
+    {
+        return plan.MaxProcessorStateAc == Constants.IdleMaxProcessorState
+            && plan.MaxProcessorStateDc == Constants.IdleMaxProcessorState;
+    }
+
+    private bool IsReusableSavingsPlan(PowerPlanInfo plan)
+    {
+        return plan.Id != Guid.Parse(Constants.EnergySaver)
+            && plan.Id != normalPlanId
+            && plan.Personality == PowerPlanPersonality.MaximumPowerSavings
+            && plan.MaxProcessorStateAc.HasValue
+            && plan.MaxProcessorStateAc.Value < 100;
+    }
+
+    private void RemoveExtraManagedPlans(
+        IReadOnlyList<PowerPlanInfo> plans,
+        Guid planToKeep)
+    {
+        foreach (PowerPlanInfo extraPlan in plans.Where(
+                     plan => plan.Id != planToKeep
+                         && IsCleanupCandidate(plan, planToKeep, normalPlanId)
+                         && string.Equals(
+                             plan.Name,
+                             Constants.IdleThrottleName,
+                             StringComparison.OrdinalIgnoreCase)))
+        {
+            uint result = powerPlans.DeletePlan(extraPlan.Id);
+            Logger.Log($"Removed extra managed idle plan {extraPlan.Id}: result={result}");
+        }
+    }
+
+    private void PersistIdleThrottlePlan(Guid planId)
+    {
+        stateStore.IdleThrottleGuid = planId.ToString();
+        stateStore.Save();
+    }
+
+    private void PersistNormalPlan(Guid planId)
+    {
+        string value = planId.ToString();
+        if (string.Equals(
+            stateStore.NormalPlanGuid,
+            value,
+            StringComparison.OrdinalIgnoreCase))
+        {
+            return;
+        }
+
+        stateStore.NormalPlanGuid = value;
+        stateStore.Save();
+    }
+
+    private void ActivateIdleThrottlePlan()
+    {
+        IReadOnlyList<PowerPlanInfo> plans = powerPlans.GetPlans();
+        if (!idleThrottlePlanId.HasValue
+            || !plans.Any(plan => plan.Id == idleThrottlePlanId.Value
+                && IsValidIdleThrottlePlan(plan)))
+        {
+            idleThrottlePlanId = FindOrCreateIdleThrottlePlan();
+        }
+
+        if (idleThrottlePlanId.HasValue)
+        {
+            ActivatePlan(idleThrottlePlanId.Value, "Idle throttle plan activated");
+            return;
+        }
+
+        Guid energySaver = Guid.Parse(Constants.EnergySaver);
+        if (plans.Any(plan => plan.Id == energySaver))
+        {
+            ActivatePlan(
+                energySaver,
+                "Managed idle plan unavailable; built-in Power Saver activated");
+        }
+    }
+
+    private void ActivatePlan(Guid planId, string successMessage)
+    {
+        uint result = powerPlans.SetActivePlan(planId);
+        if (result == 0)
+        {
+            Logger.Log($"{successMessage}: {planId}");
+        }
+        else
+        {
+            Logger.Log($"PowerSetActiveScheme failed for {planId}: result={result}");
+        }
+    }
+
+    private Task RunPowerOperationAsync(string operationName, Action operation)
+    {
+        if (disposed)
+        {
+            return Task.CompletedTask;
+        }
+
+        return Task.Run(() =>
+        {
+            lock (powerOperationLock)
+            {
+                if (disposed)
+                {
+                    return;
+                }
+
                 try
                 {
-                    var prop = Properties.Settings.Default.Properties["IdleThrottleGuid"];
-                    if (prop != null)
-                    {
-                        var stored = (string?)Properties.Settings.Default["IdleThrottleGuid"];
-                        if (!string.IsNullOrWhiteSpace(stored) && Guid.TryParse(stored, out Guid persisted))
-                        {
-                            uint result = PowerDeleteScheme(IntPtr.Zero, ref persisted);
-                            Logger.Log($"Deleted persisted idle throttle duplicate {persisted}: result={result}");
-                        }
-                        Properties.Settings.Default["IdleThrottleGuid"] = string.Empty;
-                        Properties.Settings.Default.Save();
-                    }
+                    operation();
                 }
                 catch (Exception ex)
                 {
-                    Logger.LogException("CleanupIdleThrottleDuplicate.Persisted", ex);
+                    Logger.LogException($"IdleChecker.{operationName}", ex);
+                }
+            }
+        });
+    }
+
+    private async void IdleCheckTimer_Tick(object? sender, EventArgs e)
+    {
+        long idleTimeSeconds = GetIdleTimeSeconds();
+        if (idleTimeSeconds >= idleCheckTimer.Interval / 1000
+            && Properties.Settings.Default.Enabled)
+        {
+            idleCheckTimer.Stop();
+            await EnterIdleModeAsync();
+            if (!disposed)
+            {
+                userInputCheckTimer.Start();
+            }
+        }
+    }
+
+    private async void UserInputCheckTimer_Tick(object? sender, EventArgs e)
+    {
+        long idleTimeSeconds = GetIdleTimeSeconds();
+        if (idleTimeSeconds < userInputCheckTimer.Interval / 1000
+            && Properties.Settings.Default.Enabled)
+        {
+            userInputCheckTimer.Stop();
+            await ExitIdleModeAsync();
+            if (!disposed)
+            {
+                idleCheckTimer.Start();
+            }
+        }
+    }
+
+    private static long GetIdleTimeSeconds()
+    {
+        var lastInputInfo = new LastInputInfo
+        {
+            Size = (uint)Marshal.SizeOf<LastInputInfo>()
+        };
+
+        if (!GetLastInputInfo(ref lastInputInfo))
+        {
+            return 0;
+        }
+
+        uint elapsedMilliseconds = unchecked((uint)Environment.TickCount - lastInputInfo.Time);
+        return elapsedMilliseconds / 1000;
+    }
+
+    private static int GetIdleTimeoutSeconds()
+    {
+        try
+        {
+            var property = Properties.Settings.Default.Properties["IdleTimeoutSeconds"];
+            if (property is not null)
+            {
+                int value = (int)Properties.Settings.Default["IdleTimeoutSeconds"];
+                if (value > 0)
+                {
+                    return value;
                 }
             }
         }
-
-        /// <summary>
-        /// Attempts to clean up a persisted idle throttle duplicate left from previous runs.
-        /// This prevents accumulation of duplicate power schemes across restarts.
-        /// </summary>
-        private void CleanupPersistedIdleThrottleDuplicate()
+        catch
         {
-            try
-            {
-                var prop = Properties.Settings.Default.Properties["IdleThrottleGuid"];
-                if (prop == null) return;
-
-                var stored = (string?)Properties.Settings.Default["IdleThrottleGuid"];
-                if (string.IsNullOrWhiteSpace(stored)) return;
-
-                if (Guid.TryParse(stored, out Guid persisted))
-                {
-                    uint result = PowerDeleteScheme(IntPtr.Zero, ref persisted);
-                    Logger.Log($"CleanupPersistedIdleThrottleDuplicate deleted {persisted}: result={result}");
-                }
-
-                Properties.Settings.Default["IdleThrottleGuid"] = string.Empty;
-                Properties.Settings.Default.Save();
-            }
-            catch (Exception ex)
-            {
-                Logger.LogException("CleanupPersistedIdleThrottleDuplicate", ex);
-            }
+            // Use the default.
         }
 
-        public Task ChangePowerPlan(string powerPlanGuid)
-        {
-            if (disposed) return Task.CompletedTask;
+        return DefaultIdleTimeoutSeconds;
+    }
 
-            return Task.Run(() =>
+    private static int GetInputCheckIntervalSeconds()
+    {
+        try
+        {
+            var property = Properties.Settings.Default.Properties["InputCheckIntervalSeconds"];
+            if (property is not null)
             {
-                try
+                int value = (int)Properties.Settings.Default["InputCheckIntervalSeconds"];
+                if (value > 0)
                 {
-                    if (!Guid.TryParse(powerPlanGuid, out Guid guid))
-                    {
-                        Logger.Log($"Invalid power plan GUID: {powerPlanGuid}");
-                        return;
-                    }
-
-                    uint result = PowerSetActiveScheme(IntPtr.Zero, ref guid);
-                    if (result == 0)
-                        Logger.Log($"Power plan changed to: {powerPlanGuid}");
-                    else
-                        Logger.Log($"PowerSetActiveScheme failed with error code: {result} for GUID: {powerPlanGuid}");
-                }
-                catch (Exception ex)
-                {
-                    Logger.LogException("ChangePowerPlan", ex);
-                }
-            });
-        }
-
-        public void Dispose()
-        {
-            Dispose(true);
-            GC.SuppressFinalize(this);
-        }
-
-        protected virtual void Dispose(bool disposing)
-        {
-            if (disposed) return;
-            if (disposing)
-            {
-                try { CleanupIdleThrottleDuplicate(); } catch (Exception ex) { Logger.LogException("Dispose.CleanupIdleThrottle", ex); }
-
-                try
-                {
-                    if (idleCheckTimer != null)
-                    {
-                        idleCheckTimer.Stop();
-                        idleCheckTimer.Tick -= IdleCheckTimer_Tick;
-                        idleCheckTimer.Dispose();
-                    }
-                }
-                catch (Exception ex)
-                {
-                    Logger.LogException("Dispose.idleCheckTimer", ex);
-                }
-
-                try
-                {
-                    if (userInputCheckTimer != null)
-                    {
-                        userInputCheckTimer.Stop();
-                        userInputCheckTimer.Tick -= UserInputCheckTimer_Tick;
-                        userInputCheckTimer.Dispose();
-                    }
-                }
-                catch (Exception ex)
-                {
-                    Logger.LogException("Dispose.userInputCheckTimer", ex);
+                    return value;
                 }
             }
+        }
+        catch
+        {
+            // Use the default.
+        }
+
+        return DefaultInputCheckIntervalSeconds;
+    }
+
+    public void Dispose()
+    {
+        Dispose(true);
+        GC.SuppressFinalize(this);
+    }
+
+    protected virtual void Dispose(bool disposing)
+    {
+        if (disposed)
+        {
+            return;
+        }
+
+        if (disposing)
+        {
+            idleCheckTimer.Stop();
+            idleCheckTimer.Tick -= IdleCheckTimer_Tick;
+            idleCheckTimer.Dispose();
+
+            userInputCheckTimer.Stop();
+            userInputCheckTimer.Tick -= UserInputCheckTimer_Tick;
+            userInputCheckTimer.Dispose();
+
+            lock (powerOperationLock)
+            {
+                ActivatePlan(normalPlanId, "Normal power plan restored during shutdown");
+                disposed = true;
+            }
+        }
+        else
+        {
             disposed = true;
         }
     }

@@ -1,209 +1,98 @@
-using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Power_Plan_Manager_Take_8;
 
-namespace Power_Plan_Manager_Take_8.Tests
+namespace Power_Plan_Manager_Take_8.Tests;
+
+[TestClass]
+public class EdgeCaseTests
 {
-    /// <summary>
-    /// Edge case and error handling tests for Power-Plan Manager.
-    /// Tests boundary conditions, exception scenarios, and robustness.
-    /// </summary>
-    [TestClass]
-    public class EdgeCaseTests
+    private static readonly Guid NormalPlan = Guid.Parse(Constants.HighPerformance);
+
+    [TestMethod]
+    public async Task NullEmptyAndLongGuids_DoNotChangePlan()
     {
-        [TestMethod]
-        public void EdgeCase_PowerPlanDetector_MixedCaseGuid_IsHandledCorrectly()
+        var service = FakePowerPlanService.CreateDefault();
+        var state = new FakePowerPlanStateStore();
+        using var checker = new IdleChecker(NormalPlan, service, state, startTimers: false);
+        Guid? expected = service.ActivePlan;
+
+        await checker.ChangePowerPlan(null!);
+        await checker.ChangePowerPlan(string.Empty);
+        await checker.ChangePowerPlan(new string('a', 1000));
+
+        Assert.AreEqual(expected, service.ActivePlan);
+    }
+
+    [TestMethod]
+    public void DisposeMultipleTimes_IsIdempotent()
+    {
+        var service = FakePowerPlanService.CreateDefault();
+        var checker = new IdleChecker(
+            NormalPlan,
+            service,
+            new FakePowerPlanStateStore(),
+            startTimers: false);
+
+        checker.Dispose();
+        checker.Dispose();
+        checker.Dispose();
+
+        Assert.AreEqual(NormalPlan, service.ActivePlan);
+    }
+
+    [TestMethod]
+    public async Task ConcurrentCheckerCreation_DoesNotAccumulateWithinEachStore()
+    {
+        Task<(FakePowerPlanService Service, IdleChecker Checker)>[] tasks = Enumerable
+            .Range(0, 8)
+            .Select(_ => Task.Run(() =>
+            {
+                var service = FakePowerPlanService.CreateDefault();
+                var checker = new IdleChecker(
+                    NormalPlan,
+                    service,
+                    new FakePowerPlanStateStore(),
+                    startTimers: false);
+                return (service, checker);
+            }))
+            .ToArray();
+
+        var results = await Task.WhenAll(tasks);
+        foreach (var result in results)
         {
-            // Arrange
-            string mixedCaseGuid = "8C5E7FDA-E8BF-4A96-9A85-A6E23A8C635C"; // Mixed case
-
-            // Act & Assert
-            try
-            {
-                bool result = PowerPlanDetector.IsPowerPlanAvailable(mixedCaseGuid);
-                Assert.IsTrue(result,
-                    "Mixed case GUIDs should be handled correctly (case-insensitive)");
-            }
-            catch (ArgumentException)
-            {
-                Assert.Fail("Mixed case GUIDs should be accepted");
-            }
-        }
-
-        [TestMethod]
-        public void EdgeCase_IdleChecker_Dispose_Multiple_Times_IsIdempotent()
-        {
-            // Arrange
-            var idleChecker = new IdleChecker(IdleChecker.GetSystemActivePlan());
-
-            // Act & Assert
-            try
-            {
-                idleChecker.Dispose();
-                idleChecker.Dispose();
-                idleChecker.Dispose(); // Should not throw
-            }
-            catch (Exception ex)
-            {
-                Assert.Fail($"Multiple Dispose() calls should be safe: {ex.Message}");
-            }
-        }
-
-        [TestMethod]
-        public void EdgeCase_IdleChecker_ChangePowerPlan_WithNullGuid_DoesNotCrash()
-        {
-            // Arrange
-            var idleChecker = new IdleChecker(IdleChecker.GetSystemActivePlan());
-
-            try
-            {
-                // Act - Attempt to change to null plan
-                idleChecker.ChangePowerPlan(null!);
-                Thread.Sleep(100);
-
-                // Assert - Should not crash even if process call fails
-            }
-            catch (NullReferenceException)
-            {
-                Assert.Fail("ChangePowerPlan should handle null GUID gracefully, not crash");
-            }
-            finally
-            {
-                idleChecker.Dispose();
-            }
-        }
-
-        [TestMethod]
-        public void EdgeCase_IdleChecker_ChangePowerPlan_WithEmptyGuid_DoesNotCrash()
-        {
-            // Arrange
-            var idleChecker = new IdleChecker(IdleChecker.GetSystemActivePlan());
-
-            try
-            {
-                // Act
-                idleChecker.ChangePowerPlan("");
-                Thread.Sleep(100);
-
-                // Assert - Should not crash even if powercfg fails
-            }
-            catch (Exception ex)
-            {
-                Assert.Fail($"ChangePowerPlan should handle empty GUID gracefully: {ex.Message}");
-            }
-            finally
-            {
-                idleChecker.Dispose();
-            }
-        }
-
-        [TestMethod]
-        public void EdgeCase_IdleChecker_ChangePowerPlan_WithVeryLongGuid_DoesNotCrash()
-        {
-            // Arrange
-            var idleChecker = new IdleChecker(IdleChecker.GetSystemActivePlan());
-            string veryLongGuid = new string('a', 1000);
-
-            try
-            {
-                // Act
-                idleChecker.ChangePowerPlan(veryLongGuid);
-                Thread.Sleep(100);
-
-                // Assert - Should not crash
-            }
-            catch (Exception ex)
-            {
-                Assert.Fail($"ChangePowerPlan should handle very long string gracefully: {ex.Message}");
-            }
-            finally
-            {
-                idleChecker.Dispose();
-            }
-        }
-
-        [TestMethod]
-        public void EdgeCase_Constants_GuidCase_IsConsistent()
-        {
-            // Assert - All GUIDs should use the same case convention (lowercase or uppercase)
-            var allLowercase = Constants.HighPerformance.All(c => !char.IsUpper(c) || c == '-');
-            var allUppercase = Constants.HighPerformance.All(c => !char.IsLower(c) || c == '-');
-
-            bool isConsistentCase = allLowercase || allUppercase;
-            Assert.IsTrue(isConsistentCase,
-                "GUID constants should use consistent case (all lowercase or all uppercase)");
-        }
-
-        [TestMethod]
-        public void EdgeCase_Concurrent_IdleChecker_Creation()
-        {
-            // Arrange
-            var tasks = new List<Task<IdleChecker>>();
-
-            // Act - Create multiple IdleCheckers concurrently
-            try
-            {
-                for (int i = 0; i < 5; i++)
-                {
-                    tasks.Add(Task.Run(() => new IdleChecker(IdleChecker.GetSystemActivePlan())));
-                }
-
-                Task.WaitAll(tasks.ToArray(), TimeSpan.FromSeconds(5));
-
-                // Assert - All should be created without exception
-                foreach (var task in tasks)
-                {
-                    Assert.IsNotNull(task.Result);
-                    task.Result.Dispose();
-                }
-            }
-            catch (Exception ex)
-            {
-                Assert.Fail($"Concurrent IdleChecker creation should be thread-safe: {ex.Message}");
-            }
-        }
-
-        [TestMethod]
-        public void EdgeCase_Interleaved_Dispose_And_ChangePowerPlan()
-        {
-            // Arrange
-            var idleChecker = new IdleChecker(IdleChecker.GetSystemActivePlan());
-            var disposeTask = Task.Run(() =>
-            {
-                Thread.Sleep(50);
-                idleChecker.Dispose();
-            });
-
-            // Act & Assert - Interleave power plan changes with disposal
-            try
-            {
-                for (int i = 0; i < 10; i++)
-                {
-                    idleChecker.ChangePowerPlan(Constants.EnergySaver);
-                    Thread.Sleep(10);
-                }
-
-                disposeTask.Wait(TimeSpan.FromSeconds(1));
-            }
-            catch (Exception ex)
-            {
-                Assert.Fail($"Interleaved Dispose and ChangePowerPlan should be safe: {ex.Message}");
-            }
-        }
-
-        [TestMethod]
-        public void EdgeCase_PowerPlanDetector_Handles_Corrupted_Powercfg_Output()
-        {
-            // This test verifies robustness even though we can't mock powercfg in this setup
-            // It documents the expected behavior for malformed output.
-
-            // Arrange & Act
-            string optimalPlan = PowerPlanDetector.GetOptimalHighPerformancePlan();
-
-            // Assert - Should still return a valid GUID even if output is somehow corrupted
-            Assert.IsNotNull(optimalPlan);
-            Assert.IsFalse(string.IsNullOrWhiteSpace(optimalPlan));
-            Assert.IsTrue(Guid.TryParse(optimalPlan, out _));
+            Assert.AreEqual(1, result.Service.DuplicateCallCount);
+            result.Checker.Dispose();
         }
     }
-}
 
+    [TestMethod]
+    public async Task InterleavedDisposeAndTransitions_DoNotThrowOrDuplicate()
+    {
+        var service = FakePowerPlanService.CreateDefault();
+        var checker = new IdleChecker(
+            NormalPlan,
+            service,
+            new FakePowerPlanStateStore(),
+            startTimers: false);
+
+        Task[] transitions = Enumerable.Range(0, 20)
+            .Select(index => index % 2 == 0
+                ? checker.EnterIdleModeAsync()
+                : checker.ExitIdleModeAsync())
+            .ToArray();
+
+        checker.Dispose();
+        await Task.WhenAll(transitions);
+
+        Assert.AreEqual(1, service.DuplicateCallCount);
+        Assert.AreEqual(NormalPlan, service.ActivePlan);
+    }
+
+    [TestMethod]
+    public void MixedCaseGuid_IsParsedCaseInsensitively()
+    {
+        Assert.IsTrue(Guid.TryParse(
+            "8C5E7FDA-E8BF-4A96-9A85-A6E23A8C635C",
+            out Guid parsed));
+        Assert.AreEqual(Guid.Parse(Constants.HighPerformance), parsed);
+    }
+}

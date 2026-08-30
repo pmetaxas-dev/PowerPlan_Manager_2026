@@ -26,10 +26,10 @@ No manual intervention needed. It runs silently in the background and starts aut
 ## Features
 
 - ? **Automatic idle detection** � detects inactivity via last user input timestamp
-- ? **CPU throttling on idle** � creates a temporary duplicate of Energy Saver with 50% max processor state
+- ? **CPU throttling on idle** � reuses one energy-saving plan with a 50% max processor state
 - ? **Instant restore on activity** � detects input within 5 seconds and switches back
 - ? **System tray operation** � minimizes to tray, never gets in your way
-- ? **Ryzen Universal support** � detects and uses the 1usmus Ryzen Universal power plan if available
+- ? **Vendor-plan support** � preserves a suitable active AMD, Intel, OEM, or user performance plan
 - ? **Enable / Disable toggle** � checkbox to pause management without closing the app
 - ? **Auto-start with Windows** � registered as a startup task via MSIX packaging
 - ? **File-based logging** � timestamped log at `%APPDATA%\PowerPlanManager\log.txt`
@@ -46,13 +46,13 @@ User is active
 [idleCheckTimer] � fires after 90 seconds of inactivity
      ?
      ?
-Duplicate Energy Saver scheme ? cap CPU to 50% ? activate "PPM-Idle-Throttle"
+Find or create one reusable idle scheme ? cap CPU to 50% ? activate it
      ?
      ?
 [userInputCheckTimer] � polls every 5 seconds for new input
      ?
      ?
-Input detected ? delete throttle duplicate ? restore original power plan
+Input detected ? restore the persisted normal power plan
      ?
      ?
 [idleCheckTimer] restarts
@@ -159,6 +159,11 @@ Output: `App_Packger_proj\AppPackages\App_Packger_proj_2.0.0.0_x86_x64_bundle.ms
 
 ---
 
+## Logging
+
+*    Logs are saved inside this folder:
+     %APPDATA%\PowerPlanManager\log.txt
+
 ## Testing
 
 ```bash
@@ -167,13 +172,13 @@ dotnet test "Power-Plan_Manager-2.0.Tests\Power-Plan_Manager-Take_8.Tests.csproj
 
 | Test Suite | Tests | Status |
 |---|---|---|
-| `ConstantsTests` | 9 | ? Pass |
-| `PowerPlanDetectorTests` | 7 | ? Pass |
-| `IdleCheckerTests` | 9 | ? Pass |
-| `Form1Tests` | 13 | ? Pass |
-| `EdgeCaseTests` | 10 | ? Pass |
-| `IntegrationTests` | 9 | ? Pass |
-| **Total** | **57** | **? All pass** |
+| `ConstantsTests` | 13 | Pass |
+| `PowerPlanDetectorTests` | 8 | Pass |
+| `IdleCheckerTests` | 14 | Pass |
+| `Form1Tests` | 12 | Pass |
+| `EdgeCaseTests` | 5 | Pass |
+| `PowerPlanLifecycleIntegrationTests` | 5 | Pass |
+| **Total** | **57** | **All pass** |
 
 ---
 

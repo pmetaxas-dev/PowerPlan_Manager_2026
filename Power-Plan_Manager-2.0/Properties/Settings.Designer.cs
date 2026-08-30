@@ -70,5 +70,29 @@ namespace Power_Plan_Manager_Take_8.Properties {
                 this["IdleThrottleGuid"] = value;
             }
         }
+
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("")]
+        public string NormalPlanGuid {
+            get {
+                return ((string)(this["NormalPlanGuid"]));
+            }
+            set {
+                this["NormalPlanGuid"] = value;
+            }
+        }
+
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("0")]
+        public int LegacyCleanupVersion {
+            get {
+                return ((int)(this["LegacyCleanupVersion"]));
+            }
+            set {
+                this["LegacyCleanupVersion"] = value;
+            }
+        }
     }
 }

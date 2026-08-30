@@ -22,4 +22,9 @@
     <ProjectReference Include="..\Power-Plan_Manager-2.0\Power-Plan_Manager-Take_8.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <!-- Legacy tests contain invalid text encoding and perform real power-plan writes. -->
+    <Compile Remove="IntegrationTests.cs" />
+  </ItemGroup>
+
 </Project>

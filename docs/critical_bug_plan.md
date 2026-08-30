@@ -5,8 +5,8 @@
 - Created: 2026-08-20
 - Severity: Critical
 - Target: Microsoft Store update
-- Phase: Planning complete; ready for code investigation
-- Implementation: Not started
+- Phase: Implementation complete; live-system validation pending
+- Implementation: Reusable-plan lifecycle and verified legacy cleanup implemented
 
 ## Reported Bug
 
@@ -124,8 +124,37 @@ it with one idempotent lifecycle:
 7. Preserve recovery state until native operations are confirmed successful.
 8. Never delete unrelated plans based only on their name or CPU setting.
 
-The alternative is to use Windows' built-in Energy Saver plan and create no
-custom plan. The intended product behavior must be confirmed before choosing.
+Decision: retain one reusable custom throttle plan because built-in Power Saver
+alone does not guarantee equivalent CPU savings, while temporarily modifying a
+user plan would create unsafe crash-recovery behavior.
+
+## Implementation Result — 2026-08-30
+
+- Selected the single reusable custom-plan approach after reviewing documented
+  non-elevated Windows power APIs and crash-recovery risks.
+- Corrected `PowerDuplicateScheme` marshalling so the native GUID pointer is
+  read and released correctly.
+- Added native plan enumeration and access checks without `powercfg` parsing.
+- Normal-plan selection is locale- and CPU-vendor-independent. It first reuses
+  the saved valid normal plan, then a suitable current plan, then an installed
+  Maximum Performance plan, with canonical Balanced as the final fallback.
+- Plan classification uses the Windows power-scheme personality setting rather
+  than display names or machine-specific GUIDs.
+- Legacy cleanup deletes only noncanonical Maximum Power Savings plans whose AC
+  maximum processor state is below 100%. It always protects the canonical Power
+  Saver plan, the selected normal plan, and the single retained idle plan.
+- Cleanup is marked complete only after re-enumeration verifies that no matching
+  plans remain; failures retry on the next startup.
+- One suitable existing idle plan is retained, persisted, set to 50% AC/DC, and
+  reused for every idle cycle. A new `PowerPlan Manager Idle` plan is created
+  only when no reusable plan exists.
+- Power-plan operations are serialized, and shutdown restores the normal plan.
+- Native operations and persistent state are injectable, so automated tests no
+  longer change the machine's real power plans.
+- Full automated suite: 57 passed, 0 failed, 0 skipped.
+- Production and test builds complete with 0 warnings and 0 errors.
+- An earlier candidate was tested on System 2 and exposed locale/GUID defects.
+  The corrected implementation described here has not yet received a live run.
 
 ## Test Systems
 
@@ -140,7 +169,7 @@ Three systems are available:
 This setup provides affected AMD and Intel environments plus a clean Intel
 baseline.
 
-### System 1 Evidence
+### System 1 Historical Evidence
 
 `powercfg /list` shows 30 plans:
 
@@ -156,6 +185,18 @@ The canonical Windows Power Saver GUID is
 Every buggy app version created duplicates consistently by copying the canonical
 Power Saver plan, assigning a new GUID, and changing only Maximum processor
 state to 50%. The duplicates retained the name `Power saver`.
+
+### System 2 Evidence
+
+- The affected Intel system used Greek display names and generated plan GUIDs.
+- The earlier candidate failed to remove its legacy plans because it depended
+  on the English `Power saver` name and fixed template GUIDs.
+- It also selected Balanced even though a generated Ultimate Performance plan
+  was active.
+- The legacy copies observed on this machine had 64% AC and 54% DC maximum CPU
+  state. This confirmed cleanup cannot safely depend on an exact 50% value.
+- The automated regression case now recreates this combination with Greek
+  names and arbitrary GUIDs without calling native power APIs.
 
 ## Engineering and Release Baseline
 
@@ -204,14 +245,11 @@ state to 50%. The duplicates retained the name `Power saver`.
 
 ## Investigation Inputs
 
-- Determine the exact plan-creation timing from the current code.
-- Whether the app should keep one reusable custom plan with a 50% CPU cap or use
-  the built-in Energy Saver plan.
-- The performance-plan preference order for AMD, Intel, and unknown CPUs.
-- The fallback when the preferred performance plan is unavailable.
 - The power-plan inventory and duplicate count on the second test system.
 - The initial power-plan inventory on the clean third system.
 - Any available app logs from an affected installation.
+- Live verification of cleanup, one-plan provisioning, idle activation,
+  restoration, restart recovery, and repeated cycles on System 1.
 
 ## Acceptance Criteria
 
@@ -220,11 +258,12 @@ state to 50%. The duplicates retained the name `Power saver`.
 - At most one app-owned custom plan exists, or none if the built-in plan is used.
 - The intended normal plan is restored after activity and shutdown.
 - An idle plan is never captured as the normal performance plan after restart.
-- The fastest suitable plan is selected correctly for the CPU vendor and
-  installed-plan set.
+- A suitable saved or current normal plan is preserved; otherwise an installed
+  Maximum Performance plan is selected without CPU-vendor assumptions.
 - Failed operations retain enough state for safe recovery.
 - Power-plan operations cannot race.
-- Unrelated user or vendor plans are never deleted.
+- Plans outside the explicit Maximum Power Savings plus AC-below-100 cleanup
+  signature are never deleted.
 - Restarting after a crash does not create another duplicate.
 - Legacy cleanup runs automatically without user action.
 - Cleanup is marked complete only after its result is verified.
@@ -234,5 +273,5 @@ state to 50%. The duplicates retained the name `Power saver`.
 
 ## Planning Rule
 
-Planning is complete. Code investigation is the next phase and will begin only
-when explicitly requested by the user.
+Implementation is complete. Live testing is the next phase and requires an
+explicit checkpoint because it will modify and delete real Windows power plans.

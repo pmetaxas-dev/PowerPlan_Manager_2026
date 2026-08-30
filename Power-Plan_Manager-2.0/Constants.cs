@@ -33,6 +33,7 @@ namespace Power_Plan_Manager_Take_8
             try
             {
                 ValidateGuid(HighPerformance, nameof(HighPerformance));
+                ValidateGuid(Balanced, nameof(Balanced));
                 ValidateGuid(UltimatePerformance, nameof(UltimatePerformance));
                 ValidateGuid(EnergySaver, nameof(EnergySaver));
                 ValidateGuid(RyzenUniversal, nameof(RyzenUniversal));
@@ -51,6 +52,11 @@ namespace Power_Plan_Manager_Take_8
         /// Power plan GUID for High Performance mode.
         /// </summary>
         public const string HighPerformance = "8c5e7fda-e8bf-4a96-9a85-a6e23a8c635c";
+
+        /// <summary>
+        /// Built-in Balanced power plan GUID.
+        /// </summary>
+        public const string Balanced = "381b4222-f694-41f0-9685-ff5bb260df2e";
 
         /// <summary>
         /// Power plan GUID for Ultimate Performance mode (Windows 10+).
@@ -72,6 +78,10 @@ namespace Power_Plan_Manager_Take_8
         /// Treated as an acceptable high-performance plan for AMD machines.
         /// </summary>
         public const string RyzenPowerPlan = "d8ba2c0c-8978-4d80-b094-71dd1850c424";
+
+        public const string IdleThrottleName = "PowerPlan Manager Idle";
+        public const uint IdleMaxProcessorState = 50;
+        public const int LegacyCleanupVersion = 1;
     }
 }
 

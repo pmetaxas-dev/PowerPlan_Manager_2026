@@ -1,108 +1,161 @@
-using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Power_Plan_Manager_Take_8;
-using System.Diagnostics;
 
-namespace Power_Plan_Manager_Take_8.Tests
+namespace Power_Plan_Manager_Take_8.Tests;
+
+[TestClass]
+public class PowerPlanDetectorTests
 {
-    /// <summary>
-    /// Unit tests for PowerPlanDetector utility class.
-    /// Tests power plan detection logic and GUID validation.
-    /// </summary>
-    [TestClass]
-    public class PowerPlanDetectorTests
+    [TestMethod]
+    public void Selection_RestoresSavedPlanAfterRestartWhileIdle()
     {
-        [TestMethod]
-        public void GetOptimalHighPerformancePlan_ReturnsValidGuid()
+        Guid savedPlan = Guid.NewGuid();
+        Guid idlePlan = Guid.NewGuid();
+        var plans = new[]
         {
-            // Arrange & Act
-            string result = PowerPlanDetector.GetOptimalHighPerformancePlan();
+            Plan(savedPlan, "Vendor performance", PowerPlanPersonality.Balanced, 100),
+            Plan(idlePlan, Constants.IdleThrottleName, PowerPlanPersonality.MaximumPowerSavings, 50)
+        };
 
-            // Assert
-            Assert.IsNotNull(result);
-            Assert.IsFalse(string.IsNullOrWhiteSpace(result));
-            Assert.IsTrue(Guid.TryParse(result, out _), 
-                "GetOptimalHighPerformancePlan should return a valid GUID");
-        }
+        Guid selected = PowerPlanDetector.SelectActiveUserPlan(
+            plans,
+            idlePlan,
+            savedPlan,
+            idlePlan);
 
-        [TestMethod]
-        public void GetOptimalHighPerformancePlan_ReturnEitherRyzenOrUltimate()
+        Assert.AreEqual(savedPlan, selected);
+    }
+
+    [TestMethod]
+    public void Selection_PreservesCurrentGeneratedMaximumPerformancePlan()
+    {
+        Guid generatedUltimate = Guid.NewGuid();
+        var plans = new[]
         {
-            // Arrange & Act
-            string result = PowerPlanDetector.GetOptimalHighPerformancePlan();
+            Plan(Constants.Balanced, "Εξισορρόπηση", PowerPlanPersonality.Balanced, 100),
+            Plan(generatedUltimate, "Κορυφαίες επιδόσεις", PowerPlanPersonality.MaximumPerformance, 100)
+        };
 
-            // Assert
-            bool isRyzenUniversal = result.Equals(Constants.RyzenUniversal, StringComparison.OrdinalIgnoreCase);
-            bool isRyzenAlt = result.Equals(Constants.RyzenPowerPlan, StringComparison.OrdinalIgnoreCase);
-            bool isUltimate = result.Equals(Constants.UltimatePerformance, StringComparison.OrdinalIgnoreCase);
+        Guid selected = PowerPlanDetector.SelectActiveUserPlan(
+            plans,
+            generatedUltimate,
+            savedPlanId: null,
+            idlePlanId: null);
 
-            Assert.IsTrue(isRyzenUniversal || isRyzenAlt || isUltimate,
-                "GetOptimalHighPerformancePlan should return either a known Ryzen GUID or UltimatePerformance");
-        }
+        Assert.AreEqual(generatedUltimate, selected);
+    }
 
-        [TestMethod]
-        public void IsPowerPlanAvailable_EnergySaver_ShouldBeAvailable()
+    [TestMethod]
+    public void Selection_PreservesCurrentNoncanonicalVendorPlanAtFullCpu()
+    {
+        Guid vendorPlan = Guid.NewGuid();
+        var plans = new[]
         {
-            // Arrange & Act
-            bool result = PowerPlanDetector.IsPowerPlanAvailable(Constants.EnergySaver);
+            Plan(Constants.Balanced, "Balanced", PowerPlanPersonality.Balanced, 100),
+            Plan(Constants.HighPerformance, "High performance", PowerPlanPersonality.MaximumPerformance, 100),
+            Plan(vendorPlan, "Vendor optimized", PowerPlanPersonality.Balanced, 100)
+        };
 
-            // Assert
-            Assert.IsTrue(result,
-                "Energy Saver power plan should be available on all Windows systems");
-        }
+        Guid selected = PowerPlanDetector.SelectActiveUserPlan(
+            plans,
+            vendorPlan,
+            savedPlanId: null,
+            idlePlanId: null);
 
-        [TestMethod]
-        public void IsPowerPlanAvailable_InvalidGuid_ReturnsFalse()
+        Assert.AreEqual(vendorPlan, selected);
+    }
+
+    [TestMethod]
+    public void Selection_DoesNotPreferCanonicalBalancedOverMaximumPerformance()
+    {
+        Guid generatedPerformance = Guid.NewGuid();
+        var plans = new[]
         {
-            // Arrange
-            string invalidGuid = "99999999-9999-9999-9999-999999999999";
+            Plan(Constants.Balanced, "Balanced", PowerPlanPersonality.Balanced, 100),
+            Plan(generatedPerformance, "Performance", PowerPlanPersonality.MaximumPerformance, 100)
+        };
 
-            // Act
-            bool result = PowerPlanDetector.IsPowerPlanAvailable(invalidGuid);
+        Guid selected = PowerPlanDetector.SelectActiveUserPlan(
+            plans,
+            Guid.Parse(Constants.Balanced),
+            savedPlanId: null,
+            idlePlanId: null);
 
-            // Assert
-            Assert.IsFalse(result,
-                "IsPowerPlanAvailable should return false for non-existent plan GUIDs");
-        }
+        Assert.AreEqual(generatedPerformance, selected);
+    }
 
-        [TestMethod]
-        public void ConstantsGuids_AreValidGuids()
+    [TestMethod]
+    public void Selection_UsesBalancedWhenNoPerformancePlanExists()
+    {
+        var plans = new[]
         {
-            // Assert
-            Assert.IsTrue(Guid.TryParse(Constants.HighPerformance, out _));
-            Assert.IsTrue(Guid.TryParse(Constants.UltimatePerformance, out _));
-            Assert.IsTrue(Guid.TryParse(Constants.EnergySaver, out _));
-            Assert.IsTrue(Guid.TryParse(Constants.RyzenUniversal, out _));
-            Assert.IsTrue(Guid.TryParse(Constants.RyzenPowerPlan, out _));
-        }
+            Plan(Constants.Balanced, "Balanced", PowerPlanPersonality.Balanced, 100)
+        };
 
-        [TestMethod]
-        public void ConstantsGuids_AreNotEmpty()
+        Guid selected = PowerPlanDetector.SelectActiveUserPlan(
+            plans,
+            currentPlanId: null,
+            savedPlanId: null,
+            idlePlanId: null);
+
+        Assert.AreEqual(Guid.Parse(Constants.Balanced), selected);
+    }
+
+    [TestMethod]
+    public void Eligibility_RejectsSavingsThrottledAndManagedIdlePlans()
+    {
+        Guid savings = Guid.NewGuid();
+        Guid throttledPerformance = Guid.NewGuid();
+        Guid managed = Guid.NewGuid();
+
+        Assert.IsFalse(PowerPlanDetector.IsEligibleActiveUserPlan(
+            Plan(savings, "Savings", PowerPlanPersonality.MaximumPowerSavings, 64),
+            idlePlanId: null));
+        Assert.IsFalse(PowerPlanDetector.IsEligibleActiveUserPlan(
+            Plan(throttledPerformance, "Performance", PowerPlanPersonality.MaximumPerformance, 99),
+            idlePlanId: null));
+        Assert.IsFalse(PowerPlanDetector.IsEligibleActiveUserPlan(
+            Plan(managed, Constants.IdleThrottleName, PowerPlanPersonality.Balanced, 100),
+            managed));
+    }
+
+    [TestMethod]
+    public void IsPowerPlanAvailable_InvalidGuid_ReturnsFalse()
+    {
+        Assert.IsFalse(PowerPlanDetector.IsPowerPlanAvailable("not-a-guid"));
+    }
+
+    [TestMethod]
+    public void ConstantsGuids_AreValidAndUnique()
+    {
+        string[] values =
         {
-            // Assert
-            Assert.IsFalse(string.IsNullOrWhiteSpace(Constants.HighPerformance));
-            Assert.IsFalse(string.IsNullOrWhiteSpace(Constants.UltimatePerformance));
-            Assert.IsFalse(string.IsNullOrWhiteSpace(Constants.EnergySaver));
-            Assert.IsFalse(string.IsNullOrWhiteSpace(Constants.RyzenUniversal));
-            Assert.IsFalse(string.IsNullOrWhiteSpace(Constants.RyzenPowerPlan));
-        }
+            Constants.Balanced,
+            Constants.HighPerformance,
+            Constants.UltimatePerformance,
+            Constants.EnergySaver,
+            Constants.RyzenUniversal,
+            Constants.RyzenPowerPlan
+        };
 
-        [TestMethod]
-        public void ConstantsGuids_AreUnique()
-        {
-            // Arrange
-            var guids = new[] 
-            { 
-                Constants.HighPerformance, 
-                Constants.UltimatePerformance, 
-                Constants.EnergySaver, 
-                Constants.RyzenUniversal,
-                Constants.RyzenPowerPlan
-            };
+        Assert.IsTrue(values.All(value => Guid.TryParse(value, out _)));
+        Assert.AreEqual(values.Length, values.Distinct().Count());
+    }
 
-            // Assert
-            var uniqueCount = guids.Distinct().Count();
-            Assert.AreEqual(guids.Length, uniqueCount,
-                "All power plan GUIDs should be unique");
-        }
+    private static PowerPlanInfo Plan(
+        string id,
+        string name,
+        PowerPlanPersonality personality,
+        uint acValue)
+    {
+        return Plan(Guid.Parse(id), name, personality, acValue);
+    }
+
+    private static PowerPlanInfo Plan(
+        Guid id,
+        string name,
+        PowerPlanPersonality personality,
+        uint acValue)
+    {
+        return new PowerPlanInfo(id, name, acValue, acValue, personality);
     }
 }

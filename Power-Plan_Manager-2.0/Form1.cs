@@ -1,7 +1,5 @@
 
 
-using System.Diagnostics;
-
 namespace Power_Plan_Manager_Take_8
 {
     public partial class Form1 : Form
@@ -19,10 +17,23 @@ namespace Power_Plan_Manager_Take_8
         /// </summary>
         private const int WINDOW_OFFSET_Y = 100;
 
-        IdleChecker? idleChecker;        
+        IdleChecker? idleChecker;
 
 
         public Form1()
+            : this(
+                new WindowsPowerPlanService(),
+                new SettingsPowerPlanStateStore(),
+                showFirstRunMessage: true,
+                persistApplicationSettings: true)
+        {
+        }
+
+        internal Form1(
+            IPowerPlanService powerPlanService,
+            IPowerPlanStateStore powerPlanStateStore,
+            bool showFirstRunMessage = false,
+            bool persistApplicationSettings = false)
         {
             InitializeComponent();
 
@@ -36,80 +47,56 @@ namespace Power_Plan_Manager_Take_8
             // Position window at bottom-right of screen, with offsets to avoid overlap with taskbar
             this.StartPosition = FormStartPosition.Manual;
             Rectangle resolution = Screen.PrimaryScreen?.Bounds ?? new Rectangle(0, 0, 1920, 1080);
-            this.Location = new Point(resolution.Width - this.Width - WINDOW_OFFSET_X, 
+            this.Location = new Point(resolution.Width - this.Width - WINDOW_OFFSET_X,
                                      resolution.Height - this.Height - WINDOW_OFFSET_Y);
             Logger.Log($"Form1 initialized at position: {this.Location}");
 
             // Reset the app state to 'Enabled'
             // In case it was disabled when the app closed..
             // ..or the system restarted.            
-            Properties.Settings.Default.Enabled = true;
-            Properties.Settings.Default.Save();
+            if (persistApplicationSettings)
+            {
+                Properties.Settings.Default.Enabled = true;
+                Properties.Settings.Default.Save();
+            }
             //
 
-            // Determine and enforce the preferred high-performance plan BEFORE creating IdleChecker
-            // so the app does not capture Energy Saver (or other low-power plan) as the "system" plan.
-            string currentActivePlan = IdleChecker.GetSystemActivePlan();
-            Logger.Log($"Captured system active plan before enforcement: {currentActivePlan}");
-
-            // Determine the preferred candidate (Ryzen variants -> Ultimate)
-            string preferred = PowerPlanDetector.GetOptimalHighPerformancePlan();
-
-            string chosenPlan;
-            if (PowerPlanDetector.IsPowerPlanAvailable(preferred))
+            Guid? currentActivePlan = powerPlanService.GetActivePlan();
+            Guid chosenPlan;
+            try
             {
-                chosenPlan = preferred;
+                IReadOnlyList<PowerPlanInfo> installedPlans = powerPlanService.GetPlans();
+                chosenPlan = PowerPlanDetector.SelectActiveUserPlan(
+                    installedPlans,
+                    currentActivePlan,
+                    PowerPlanDetector.ParseGuid(powerPlanStateStore.NormalPlanGuid),
+                    PowerPlanDetector.ParseGuid(powerPlanStateStore.IdleThrottleGuid));
             }
-            else if (PowerPlanDetector.IsPowerPlanAvailable(Constants.HighPerformance))
+            catch (Exception ex)
             {
-                chosenPlan = Constants.HighPerformance;
-            }
-            else
-            {
-                chosenPlan = currentActivePlan; // fall back to current active
+                Logger.LogException("Form1.SelectNormalPowerPlan", ex);
+                chosenPlan = Guid.Parse(Constants.Balanced);
             }
 
-            // If the chosen plan differs from current active, force it using powercfg /setactive
-            if (!string.Equals(chosenPlan, currentActivePlan, StringComparison.OrdinalIgnoreCase))
-            {
-                try
-                {
-                    Logger.Log($"Attempting to set active power plan to {chosenPlan} on startup");
-                    var psi = new ProcessStartInfo("powercfg", $"/setactive {chosenPlan}")
-                    {
-                        CreateNoWindow = true,
-                        UseShellExecute = false,
-                        RedirectStandardOutput = true,
-                        RedirectStandardError = true
-                    };
+            Logger.Log(
+                $"Startup selected normal plan {chosenPlan}; previously active: "
+                + $"{currentActivePlan?.ToString() ?? "unknown"}");
 
-                    using (var p = Process.Start(psi))
-                    {
-                        if (p != null)
-                        {
-                            string outText = p.StandardOutput.ReadToEnd();
-                            string errText = p.StandardError.ReadToEnd();
-                            p.WaitForExit();
-                            Logger.Log($"powercfg /setactive output: {outText.Trim()} {errText.Trim()}");
-                        }
-                    }
-                }
-                catch (Exception ex)
-                {
-                    Logger.LogException("Form1.SetActivePowerPlan", ex);
-                }
-            }
-
-            // Create IdleChecker with the chosen plan (this is the plan the app will restore after idle)
-            idleChecker = new IdleChecker(chosenPlan);
-
-            // Run redundant-powerplan cleanup once on startup (background)
-            try { idleChecker.RemoveRedundantEnergySaverPlans(); } catch (Exception ex) { Logger.LogException("Form1.RemoveRedundantEnergySaverPlans", ex); }
+            // IdleChecker activates the normal plan before cleanup/provisioning, then
+            // starts its timers only after the lifecycle is ready.
+            idleChecker = new IdleChecker(
+                chosenPlan,
+                powerPlanService,
+                powerPlanStateStore,
+                startTimers: true);
 
             // Check if it's the first run
-            if (Properties.Settings.Default.FirstRun == 1)
+            if (persistApplicationSettings && Properties.Settings.Default.FirstRun == 1)
             {
-                MessageBox.Show("Hi! Power-Plan Manager is minimized to tray. Enjoy!");
+                if (showFirstRunMessage)
+                {
+                    MessageBox.Show("Hi! Power-Plan Manager is minimized to tray. Enjoy!");
+                }
 
                 // Mark as not the first run
                 Properties.Settings.Default.FirstRun = 0;
