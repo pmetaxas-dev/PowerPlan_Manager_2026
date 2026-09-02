@@ -5,7 +5,7 @@
 - Created: 2026-08-20
 - Severity: Critical
 - Target: Microsoft Store update
-- Phase: Implementation complete; live-system validation pending
+- Phase: Store upload generated and structurally validated; packaged-install validation pending
 - Implementation: Reusable-plan lifecycle and verified legacy cleanup implemented
 
 ## Reported Bug
@@ -154,7 +154,9 @@ user plan would create unsafe crash-recovery behavior.
 - Full automated suite: 57 passed, 0 failed, 0 skipped.
 - Production and test builds complete with 0 warnings and 0 errors.
 - An earlier candidate was tested on System 2 and exposed locale/GUID defects.
-  The corrected implementation described here has not yet received a live run.
+- The corrected implementation subsequently passed live testing on affected
+  System 2 and clean System 3.
+- Release version `2.1.0.0` Store upload built successfully for x86 and x64.
 
 ## Test Systems
 
@@ -198,11 +200,23 @@ state to 50%. The duplicates retained the name `Power saver`.
 - The automated regression case now recreates this combination with Greek
   names and arbitrary GUIDs without calling native power APIs.
 
+### Live Validation — 2026-09-02
+
+- **System 2 (affected Intel):** retained Ultimate Performance as the Active
+  User plan and automatically deleted the redundant localized savings plans.
+- The first corrected test skipped cleanup because the wrong `user.config` had
+  been reset; after resetting the active cleanup marker, cleanup completed.
+- **System 3 (clean Intel):** the app behaved correctly on a machine where it
+  had never previously been installed.
+- These results validate affected-machine remediation and clean-machine safety.
+  AMD live regression on System 1 and packaged-install validation remain open.
+
 ## Engineering and Release Baseline
 
 - The app is a .NET 8 WinForms system-tray utility.
-- Microsoft Store version `2.0.0.0` and local Release version `2.0.1.0` both
-  exhibit the duplicate-plan behavior.
+- Microsoft Store version `2.0.0.0` and the previous local Release version
+  `2.0.1.0` both exhibited the duplicate-plan behavior.
+- Critical-fix executable and MSIX package versions are aligned at `2.1.0.0`.
 - The problem is considered Windows-version-independent; further OS-version
   collection is unnecessary.
 - On 2026-08-19, the documented test suite completed with 57 passed, 0 failed,
@@ -216,7 +230,8 @@ state to 50%. The duplicates retained the name `Power saver`.
 - Local Store-packaging tooling is available: Visual Studio 2022 Professional,
   Desktop Bridge targets, Windows SDK 10.0.26100, MakeAppx x86/x64 tools, an
   existing packaging project, and Store association metadata.
-- No Store package for this critical update has yet been generated or validated.
+- The `2.1.0.0` Store upload was generated and its archive and embedded bundle
+  manifests were inspected successfully.
 
 ### Test Boundaries and Safety
 
@@ -231,17 +246,22 @@ state to 50%. The duplicates retained the name `Power saver`.
 
 ### Release Concerns
 
-- Recorded versions are inconsistent: generated package `1.5.3.0`, README
-  `2.0.0`, assembly/file `2.0.1.0`, and MSIX manifest `2.1.0.0`.
-- Select a consistent release version higher than the latest Partner Center
-  submission; do not reuse the existing `1.5.3.0` package output.
-- Confirm package identity and publisher against the existing Store product.
-- Generate a signed sideload package for packaged functional testing and a
-  separate Store upload artifact for Partner Center.
-- Inspect bundle architectures, manifest, dependencies, symbols, and filenames.
-- The repository has no `global.json`; the .NET 8 target currently builds with
-  installed .NET 9 SDKs. Pin an approved SDK or deliberately document and verify
-  the selected release toolchain.
+- Release version is standardized at `2.1.0.0`, higher than the reported Store
+  installation version `2.0.0.0`. Do not reuse the old `1.5.3.0` output.
+- Store identity `20761PanosMetaxas.AutomaticPower` and publisher
+  `CN=6A7A0139-AA17-400B-B6CF-A1B3D2DFEB3C` match the repository's Store
+  association metadata.
+- The unsigned Partner Center upload contains x86 and x64 application packages,
+  both symbol files, version `2.1.0.0`, the startup-task extension, and the
+  declared `internetClient` and `runFullTrust` capabilities.
+- Store upload artifact:
+  `App_Packger_proj/AppPackages/App_Packger_proj_2.1.0.0_x86_x64_bundle.msixupload`.
+- SHA-256:
+  `21085C6A94D9C84D68D53A165DEED86B56D89A75A86A11D939A7B11C033FBFCE`.
+- A signed sideload package must still be generated and installed for packaged
+  functional testing before Partner Center submission.
+- The verified release toolchain used Visual Studio MSBuild `17.14.40`, .NET SDK
+  `9.0.315`, .NET 8 target packs `8.0.28`, and Windows SDK target `10.0.26100.0`.
 
 ## Investigation Inputs
 
@@ -273,5 +293,5 @@ state to 50%. The duplicates retained the name `Power saver`.
 
 ## Planning Rule
 
-Implementation is complete. Live testing is the next phase and requires an
-explicit checkpoint because it will modify and delete real Windows power plans.
+Implementation and unpackaged PC2/PC3 validation are complete. Store-package
+generation and packaged-install validation are the remaining release gates.

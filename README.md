@@ -4,7 +4,7 @@
 
 [![Platform](https://img.shields.io/badge/platform-Windows%2010%2F11-blue)](https://apps.microsoft.com/detail/9p87s5vf93vq?hl=en-US&gl=US)
 [![Framework](https://img.shields.io/badge/.NET-8.0-purple)](https://dotnet.microsoft.com)
-[![Version](https://img.shields.io/badge/version-2.0.0-green)](https://github.com/pmetaxas-dev/PowerPlan_Manager_2026/releases)
+[![Version](https://img.shields.io/badge/version-2.1.0-green)](https://github.com/pmetaxas-dev/PowerPlan_Manager_2026/releases)
 [![Tests](https://img.shields.io/badge/tests-57%20passing-brightgreen)](#testing)
 [![Store](https://img.shields.io/badge/Microsoft%20Store-Available-blue)](https://apps.microsoft.com/detail/9p87s5vf93vq?hl=en-US&gl=US)
 
@@ -122,7 +122,7 @@ Search for **PowerPlan Manager** in the Microsoft Store, or click the link below
 **?? [https://apps.microsoft.com/detail/9p87s5vf93vq?hl=en-US&gl=US](https://apps.microsoft.com/detail/9p87s5vf93vq?hl=en-US&gl=US)**
 
 ### Via MSIX Package
-1. Download the latest `App_Packger_proj_2.0.0.0_x86_x64_bundle.msixbundle`
+1. Obtain the signed `App_Packger_proj_2.1.0.0_x86_x64.msixbundle` sideload build
 2. Double-click to install
 3. The app will appear in Start Menu and auto-start with Windows
 
@@ -155,7 +155,7 @@ msbuild App_Packger_proj\App_Packger_proj.wapproj ^
   /p:AppxPackageSigningEnabled=false ^
   /p:Platform=x86
 ```
-Output: `App_Packger_proj\AppPackages\App_Packger_proj_2.0.0.0_x86_x64_bundle.msixupload`
+Output: `App_Packger_proj\AppPackages\App_Packger_proj_2.1.0.0_x86_x64_bundle.msixupload`
 
 ---
 
@@ -235,7 +235,8 @@ Clear-Content "$env:APPDATA\PowerPlanManager\log.txt"
 
 | Version | Date | Notes |
 |---------|------|-------|
-| 2.0.0 | 2026 | x86+x64 bundle, CPU throttle plan, .NET 8, 57 tests |
+| 2.1.0 | 2026 | Critical duplicate-plan cleanup, stable idle-plan reuse, locale-independent plan selection |
+| 2.0.0 | 2026 | x86+x64 bundle, CPU throttle plan, .NET 8 |
 | 1.5.3 | 2024 | Previous Store release |
 
 ---
